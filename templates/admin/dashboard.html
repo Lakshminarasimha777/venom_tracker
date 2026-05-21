@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Venom_Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 bg-light py-3" style="min-height: calc(100vh - 100px);">
+            <nav class="nav flex-column">
+                <a class="nav-link active" href="{{ url_for('admin.dashboard') }}">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a class="nav-link" href="{{ url_for('admin.hospitals') }}">
+                    <i class="fas fa-hospital"></i> Hospitals
+                </a>
+                <a class="nav-link" href="{{ url_for('admin.users') }}">
+                    <i class="fas fa-users"></i> Users
+                </a>
+                <a class="nav-link" href="{{ url_for('admin.emergency_cases') }}">
+                    <i class="fas fa-exclamation-circle"></i> Emergency Cases
+                </a>
+                <a class="nav-link" href="{{ url_for('admin.analytics') }}">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+                <a class="nav-link" href="{{ url_for('admin.settings') }}">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-10 py-4">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h1>Admin Dashboard</h1>
+                    <p class="text-muted">Welcome, {{ admin.username }}</p>
+                </div>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                            <h5 class="card-title">Total Users</h5>
+                            <h3>{{ total_users }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-hospital fa-2x text-success mb-2"></i>
+                            <h5 class="card-title">Total Hospitals</h5>
+                            <h3>{{ total_hospitals }}</h3>
+                            <small class="text-muted">{{ verified_hospitals }} verified</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-exclamation-circle fa-2x text-danger mb-2"></i>
+                            <h5 class="card-title">Cases Today</h5>
+                            <h3>{{ today_cases }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-boxes fa-2x text-info mb-2"></i>
+                            <h5 class="card-title">Total Stock</h5>
+                            <h3>{{ total_stock }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alert for Pending Verifications -->
+            {% if pending_hospitals > 0 %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <i class="fas fa-hourglass-end"></i>
+                            <strong>{{ pending_hospitals }} hospital(s) pending verification</strong>
+                            <a href="{{ url_for('admin.hospitals', status='unverified') }}" class="alert-link">View</a>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Recent Emergency Cases -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fas fa-history"></i> Recent Emergency Cases
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_cases %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Patient</th>
+                                                <th>Snake Type</th>
+                                                <th>Severity</th>
+                                                <th>Hospital</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for case in recent_cases %}
+                                                <tr>
+                                                    <td>{{ case.created_at.strftime('%d-%m-%Y %H:%M') }}</td>
+                                                    <td>{{ case.user.username if case.user else 'N/A' }}</td>
+                                                    <td>{{ case.snake_type or 'Unknown' }}</td>
+                                                    <td>
+                                                        <span class="badge bg-{{ 'danger' if case.severity == 'severe' else 'warning' }}">
+                                                            {{ case.severity }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ case.hospital.name if case.hospital else 'Unassigned' }}</td>
+                                                    <td>
+                                                        <span class="badge bg-{{ 'success' if case.status == 'completed' else 'info' }}">
+                                                            {{ case.status }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No emergency cases.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

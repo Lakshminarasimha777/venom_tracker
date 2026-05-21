@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Venom_Tracker{% endblock %}
+
+{% block content %}
+<div class="hero-section bg-gradient text-white py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="fas fa-hospital"></i> Venom_Tracker
+                </h1>
+                <p class="lead mb-4">
+                    Quick access to anti-venom stock at nearby hospitals during snake-bite emergencies
+                </p>
+                <div class="d-grid gap-2 d-sm-flex">
+                    {% if not session.get('user_type') %}
+                        <a href="{{ url_for('auth.register_user') }}" class="btn btn-light btn-lg px-4 gap-3">
+                            <i class="fas fa-user-plus"></i> Register as User
+                        </a>
+                        <a href="{{ url_for('auth.login_user_page') }}" class="btn btn-outline-light btn-lg px-4">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                    {% elif session.get('user_type') == 'user' %}
+                        <a href="{{ url_for('user.find_hospitals') }}" class="btn btn-light btn-lg px-4 gap-3">
+                            <i class="fas fa-hospital"></i> Find Hospitals
+                        </a>
+                        <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-light btn-lg px-4">
+                            <i class="fas fa-chart-line"></i> Dashboard
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <img src="https://via.placeholder.com/500x400?text=Anti-Venom+Network" alt="Venom_Tracker" class="img-fluid rounded-lg">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Key Features</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-map-marker-alt fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Real-Time Location</h5>
+                        <p class="card-text">Find nearby hospitals with GPS tracking and distance calculation</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-heartbeat fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">Emergency SOS</h5>
+                        <p class="card-text">Send emergency alerts to nearby hospitals instantly</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-boxes fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Stock Tracking</h5>
+                        <p class="card-text">Check real-time anti-venom availability at hospitals</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Our Network</h2>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="stat-card text-center p-4">
+                    <h3 class="display-4 text-primary">500+</h3>
+                    <p>Hospitals Connected</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center p-4">
+                    <h3 class="display-4 text-success">50K+</h3>
+                    <p>Active Users</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center p-4">
+                    <h3 class="display-4 text-warning">10K+</h3>
+                    <p>Lives Saved</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center p-4">
+                    <h3 class="display-4 text-info">100%</h3>
+                    <p>Coverage</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="mb-4">In Case of Snake-Bite Emergency</h2>
+        <p class="lead mb-4">Call the National Poison Control Helpline immediately</p>
+        <h3 class="display-5 fw-bold mb-4">1800-11-6117</h3>
+        <p>Or use the Emergency SOS button in your Venom_Tracker app</p>
+    </div>
+</section>
+
+<!-- Registration Options -->
+{% if not session.get('user_type') %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Register Your Role</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-tie fa-4x text-primary mb-3"></i>
+                        <h5 class="card-title">Farmer / Patient</h5>
+                        <p class="card-text">Find nearby hospitals and emergency services</p>
+                        <a href="{{ url_for('auth.register_user') }}" class="btn btn-primary">Register</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow">
+                    <div class="card-body text-center">
+                        <i class="fas fa-hospital fa-4x text-success mb-3"></i>
+                        <h5 class="card-title">Hospital</h5>
+                        <p class="card-text">Manage anti-venom stock and emergency cases</p>
+                        <a href="{{ url_for('auth.register_hospital') }}" class="btn btn-success">Register</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow">
+                    <div class="card-body text-center">
+                        <i class="fas fa-shield-alt fa-4x text-danger mb-3"></i>
+                        <h5 class="card-title">Administrator</h5>
+                        <p class="card-text">Manage hospitals and monitor the network</p>
+                        <a href="{{ url_for('auth.login_user_page') }}" class="btn btn-danger">Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

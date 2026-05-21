@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Venom_Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Hospital Analytics</h1>
+        </div>
+    </div>
+    
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-chart-line fa-2x text-primary mb-2"></i>
+                    <h5 class="card-title">Total Cases (30 days)</h5>
+                    <h3>{{ total_cases }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h5 class="card-title">Accepted</h5>
+                    <h3>{{ accepted_cases }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-tasks fa-2x text-info mb-2"></i>
+                    <h5 class="card-title">Completed</h5>
+                    <h3>{{ completed_cases }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-percentage fa-2x text-warning mb-2"></i>
+                    <h5 class="card-title">Success Rate</h5>
+                    <h3>{{ (completed_cases / total_cases * 100)|int if total_cases > 0 else 0 }}%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Stock Status</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="stockChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Case Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="caseChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Stock Chart
+{% if stocks %}
+const stockCtx = document.getElementById('stockChart').getContext('2d');
+new Chart(stockCtx, {
+    type: 'bar',
+    data: {
+        labels: [{% for stock in stocks %}'{{ stock.venom_type }}'{% if not loop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Available Stock',
+            data: [{% for stock in stocks %}{{ stock.quantity }}{% if not loop.last %},{% endif %}{% endfor %}],
+            backgroundColor: '#007bff'
+        }]
+    }
+});
+{% endif %}
+
+// Case Chart
+const caseCtx = document.getElementById('caseChart').getContext('2d');
+new Chart(caseCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Accepted', 'Completed'],
+        datasets: [{
+            data: [{{ accepted_cases }}, {{ completed_cases }}],
+            backgroundColor: ['#17a2b8', '#28a745']
+        }]
+    }
+});
+</script>
+{% endblock %}

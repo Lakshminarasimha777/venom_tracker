@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Case Details - Venom_Tracker{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{{ url_for('user.cases') }}" class="btn btn-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <h1>Case Details</h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Case Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Case ID:</strong> #{{ case.id }}</p>
+                            <p><strong>Date:</strong> {{ case.created_at.strftime('%d-%m-%Y %H:%M') }}</p>
+                            <p><strong>Snake Type:</strong> {{ case.snake_type or 'Unknown' }}</p>
+                            <p><strong>Severity:</strong> 
+                                <span class="badge bg-{{ 'danger' if case.severity == 'severe' else 'warning' if case.severity == 'moderate' else 'info' }}">
+                                    {{ case.severity }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Location:</strong> {{ case.location }}</p>
+                            <p><strong>Status:</strong>
+                                <span class="badge bg-{{ 'success' if case.status == 'completed' else 'info' if case.status == 'accepted' else 'warning' }}">
+                                    {{ case.status }}
+                                </span>
+                            </p>
+                            <p><strong>Coordinates:</strong> {{ case.latitude }}, {{ case.longitude }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if case.description %}
+                        <hr>
+                        <p><strong>Description:</strong></p>
+                        <p>{{ case.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if case.hospital %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Hospital Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Hospital:</strong> {{ case.hospital.name }}</p>
+                        <p><strong>Phone:</strong> <a href="tel:{{ case.hospital.phone }}">{{ case.hospital.phone }}</a></p>
+                        <p><strong>Address:</strong> {{ case.hospital.address }}</p>
+                        <p><strong>Response Time:</strong> 
+                            {% if case.hospital_response_time %}
+                                {{ case.hospital_response_time.strftime('%d-%m-%Y %H:%M') }}
+                            {% else %}
+                                Pending
+                            {% endif %}
+                        </p>
+                        
+                        {% if case.medical_notes %}
+                            <hr>
+                            <p><strong>Medical Notes:</strong></p>
+                            <p>{{ case.medical_notes }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Map -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Location Map</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map" style="height: 300px;"></div>
+                </div>
+            </div>
+            
+            <!-- Quick Info -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Created:</strong> {{ case.created_at.strftime('%d-%m-%Y %H:%M') }}</p>
+                    <p><strong>Updated:</strong> {{ case.updated_at.strftime('%d-%m-%Y %H:%M') }}</p>
+                    {% if case.hospital_response_time %}
+                        <p><strong>Response Time:</strong> 
+                            {% set time_diff = case.hospital_response_time - case.created_at %}
+                            {{ time_diff.total_seconds()|int }} seconds
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize map
+const map = L.map('map').setView([{{ case.latitude }}, {{ case.longitude }}], 15);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
+}).addTo(map);
+
+// Add marker
+L.circleMarker([{{ case.latitude }}, {{ case.longitude }}], {
+    radius: 10,
+    fillColor: '#dc3545',
+    color: '#fff',
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.8
+}).addTo(map).bindPopup('<strong>{{ case.location }}</strong>');
+</script>
+{% endblock %}

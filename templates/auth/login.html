@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Venom_Tracker{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-sign-in-alt fa-3x text-primary"></i>
+                        <h2 class="mt-3">Login</h2>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('auth.login_user_page') }}">
+                        <!-- User Type Selection -->
+                        <div class="mb-3">
+                            <label for="user_type" class="form-label">Login As</label>
+                            <select class="form-select" name="user_type" id="user_type" required>
+                                <option value="user" selected>Patient / Farmer</option>
+                                <option value="hospital">Hospital</option>
+                                <option value="admin">Administrator</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Username/Email -->
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username or Email</label>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username or email" required>
+                        </div>
+                        
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                        
+                        <!-- Remember Me -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">
+                                Remember me
+                            </label>
+                        </div>
+                        
+                        <!-- Submit -->
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </form>
+                    
+                    <hr>
+                    
+                    <!-- Register Links -->
+                    <p class="text-center mb-0">
+                        Don't have an account?
+                        <a href="{{ url_for('auth.register_user') }}" class="text-decoration-none">Register as User</a>
+                        <br>
+                        Are you a hospital?
+                        <a href="{{ url_for('auth.register_hospital') }}" class="text-decoration-none">Register Hospital</a>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Demo Credentials -->
+            <div class="alert alert-info mt-3" role="alert">
+                <h5 class="alert-heading">Demo Credentials</h5>
+                <small>
+                    <strong>User:</strong> farmer1 / password123<br>
+                    <strong>Hospital:</strong> city-hospital@example.com / hospital123<br>
+                    <strong>Admin:</strong> admin / admin123
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

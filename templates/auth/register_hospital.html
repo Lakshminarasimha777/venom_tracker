@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Registration - Venom_Tracker{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-7">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-hospital fa-3x text-success"></i>
+                        <h2 class="mt-3">Hospital Registration</h2>
+                        <p class="text-muted">Join the anti-venom network to help save lives</p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('auth.register_hospital') }}">
+                        <!-- Hospital Name -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Hospital Name *</label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Official hospital name" required>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address *</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Hospital email" required>
+                        </div>
+                        
+                        <!-- Phone -->
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Contact Number *</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="Hospital phone number" required>
+                        </div>
+                        
+                        <!-- Address -->
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address *</label>
+                            <textarea class="form-control" id="address" name="address" rows="2" placeholder="Full hospital address" required></textarea>
+                        </div>
+                        
+                        <!-- Location Info -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="district" class="form-label">District *</label>
+                                <select class="form-select" id="district" name="district" required>
+                                    <option value="">Select district</option>
+                                    <option>Visakhapatnam</option>
+                                    <option>Vizianagaram</option>
+                                    <option>Srikakulam</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="state" class="form-label">State *</label>
+                                <input type="text" class="form-control" id="state" name="state" value="Andhra Pradesh" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Pincode -->
+                        <div class="mb-3">
+                            <label for="pincode" class="form-label">Pincode *</label>
+                            <input type="text" class="form-control" id="pincode" name="pincode" placeholder="6-digit pincode" required>
+                        </div>
+                        
+                        <!-- Coordinates -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="latitude" class="form-label">Latitude</label>
+                                <input type="number" class="form-control" id="latitude" name="latitude" step="0.0001" placeholder="Leave blank for auto-detection">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="longitude" class="form-label">Longitude</label>
+                                <input type="number" class="form-control" id="longitude" name="longitude" step="0.0001" placeholder="Leave blank for auto-detection">
+                            </div>
+                        </div>
+                        
+                        <!-- Registration Numbers -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="registration_number" class="form-label">Registration Number</label>
+                                <input type="text" class="form-control" id="registration_number" name="registration_number" placeholder="Medical registration number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="license_number" class="form-label">License Number</label>
+                                <input type="text" class="form-control" id="license_number" name="license_number" placeholder="Hospital license number">
+                            </div>
+                        </div>
+                        
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password *</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Create a password" required>
+                            <small class="form-text text-muted">At least 6 characters</small>
+                        </div>
+                        
+                        <!-- Confirm Password -->
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm Password *</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+                        </div>
+                        
+                        <!-- Agreement -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="agree" name="agree" required>
+                            <label class="form-check-label" for="agree">
+                                I agree to the terms and confirm the information is accurate
+                            </label>
+                        </div>
+                        
+                        <!-- Submit -->
+                        <button type="submit" class="btn btn-success w-100 mb-3">
+                            <i class="fas fa-hospital"></i> Register Hospital
+                        </button>
+                    </form>
+                    
+                    <hr>
+                    
+                    <!-- Login Link -->
+                    <p class="text-center mb-0">
+                        Already registered?
+                        <a href="{{ url_for('auth.login_user_page') }}" class="text-decoration-none fw-bold">Login here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Venom_Tracker{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Settings</h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Profile Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('user.update_settings') }}">
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ user.phone or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="district" class="form-label">District</label>
+                            <input type="text" class="form-control" id="district" name="district" value="{{ user.district or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="village" class="form-label">Village</label>
+                            <input type="text" class="form-control" id="village" name="village" value="{{ user.village or '' }}">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Preferences</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('user.update_settings') }}">
+                        <div class="mb-3">
+                            <label for="language" class="form-label">Language</label>
+                            <select class="form-select" id="language" name="language">
+                                <option value="en" {% if user.language_preference == 'en' %}selected{% endif %}>English</option>
+                                <option value="te" {% if user.language_preference == 'te' %}selected{% endif %}>Telugu</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="theme" class="form-label">Theme</label>
+                            <select class="form-select" id="theme" name="theme">
+                                <option value="light" {% if user.theme == 'light' %}selected{% endif %}>Light</option>
+                                <option value="dark" {% if user.theme == 'dark' %}selected{% endif %}>Dark</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save Preferences</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

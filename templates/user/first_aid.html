@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}First Aid - Venom_Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 bg-light py-3" style="min-height: calc(100vh - 100px);">
+            <nav class="nav flex-column">
+                <a class="nav-link" href="{{ url_for('user.dashboard') }}">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a class="nav-link" href="{{ url_for('user.find_hospitals') }}">
+                    <i class="fas fa-hospital"></i> Find Hospitals
+                </a>
+                <a class="nav-link" href="{{ url_for('user.cases') }}">
+                    <i class="fas fa-list"></i> My Cases
+                </a>
+                <a class="nav-link active" href="{{ url_for('user.first_aid') }}">
+                    <i class="fas fa-first-aid"></i> First Aid
+                </a>
+                <a class="nav-link" href="{{ url_for('user.notifications') }}">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+                <a class="nav-link" href="{{ url_for('user.settings') }}">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-10 py-4">
+            <h1 class="mb-4">Snake-Bite First Aid Guide</h1>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Alert -->
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>⚠️ EMERGENCY</strong><br>
+                        Call the National Poison Control Helpline: <strong>1800-11-6117</strong><br>
+                        Do not delay medical treatment for any reason
+                    </div>
+                    
+                    <!-- First Aid Steps -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">Immediate Actions (First 5 Minutes)</h5>
+                        </div>
+                        <div class="card-body">
+                            <ol class="list-group list-group-numbered">
+                                <li class="list-group-item">
+                                    <strong>Call for Emergency Help</strong>
+                                    <p class="mb-0">Call 112 or your local emergency number immediately</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Immobilize the Bitten Limb</strong>
+                                    <p class="mb-0">Don't move the affected limb. Use a sling or splint if possible</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Remove Tight Items</strong>
+                                    <p class="mb-0">Remove jewelry, watches, rings from the bitten limb</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Keep Person Calm and Still</strong>
+                                    <p class="mb-0">Movement increases venom absorption. Keep patient lying down</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Apply Pressure Immobilization</strong>
+                                    <p class="mb-0">Wrap the limb with elastic bandage (not too tight). Immobilize with splint</p>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <!-- What NOT to Do -->
+                    <div class="card mb-4 border-0 shadow-sm bg-danger bg-opacity-10">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">❌ DO NOT DO THESE</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-times text-danger"></i>
+                                    <strong>Do NOT cut or suck the wound</strong>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-times text-danger"></i>
+                                    <strong>Do NOT apply ice or tourniquets</strong>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-times text-danger"></i>
+                                    <strong>Do NOT use folk remedies or herbs</strong>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-times text-danger"></i>
+                                    <strong>Do NOT delay going to hospital</strong>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-times text-danger"></i>
+                                    <strong>Do NOT give alcohol or other drugs</strong>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Symptoms to Watch -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">⚠️ Warning Symptoms</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Seek immediate medical help if you notice:</p>
+                            <ul>
+                                <li>Severe pain or swelling around the bite</li>
+                                <li>Discoloration or bruising</li>
+                                <li>Bleeding from bite or other sites</li>
+                                <li>Difficulty breathing or swallowing</li>
+                                <li>Numbness or tingling</li>
+                                <li>Drooping eyelids or eye problems</li>
+                                <li>Muscle weakness or paralysis</li>
+                                <li>Vomiting or abdominal pain</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar Info -->
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Common Snakes in India</h5>
+                        </div>
+                        <div class="card-body small">
+                            <p><strong>The "Big 4" Venomous Snakes:</strong></p>
+                            <ul>
+                                <li>Indian Cobra</li>
+                                <li>Common Krait</li>
+                                <li>Russell's Viper</li>
+                                <li>Saw-scaled Viper</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Emergency Contacts</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Poison Control:</strong></p>
+                            <h4 class="text-danger">1800-11-6117</h4>
+                            <p class="small text-muted">Available 24/7</p>
+                            <hr>
+                            <p><strong>Ambulance:</strong></p>
+                            <h4>102</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

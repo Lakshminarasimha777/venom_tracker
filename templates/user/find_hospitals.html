@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Find Hospitals - Venom_Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Map Column -->
+        <div class="col-md-7 p-0">
+            <div id="map" style="height: 80vh;"></div>
+        </div>
+        
+        <!-- Hospital List Column -->
+        <div class="col-md-5 py-4 px-3" style="max-height: 80vh; overflow-y: auto; background-color: #f8f9fa;">
+            <h3 class="mb-4">Nearby Hospitals</h3>
+            
+            <!-- Search Filters -->
+            <div class="card mb-3 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="search_radius" class="form-label">Search Radius (km)</label>
+                        <input type="number" class="form-control" id="search_radius" value="50" min="5" max="100">
+                    </div>
+                    <button class="btn btn-primary w-100" id="findHospitals">
+                        <i class="fas fa-search"></i> Find Hospitals
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Hospitals List -->
+            <div id="hospitalsList">
+                {% if nearby_hospitals %}
+                    {% for hospital in nearby_hospitals %}
+                        <div class="card mb-3 border-0 shadow-sm hospital-card" data-hospital-id="{{ hospital.id }}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="card-title">{{ hospital.name }}</h5>
+                                        <p class="text-muted mb-2">
+                                            <i class="fas fa-map-marker-alt"></i> {{ hospital.distance }} km away
+                                        </p>
+                                        <p class="card-text">{{ hospital.address }}</p>
+                                        <p class="mb-2">
+                                            <i class="fas fa-phone"></i> <a href="tel:{{ hospital.phone }}">{{ hospital.phone }}</a>
+                                        </p>
+                                    </div>
+                                    <div class="text-end">
+                                        {% if hospital.total_stock > 0 %}
+                                            <span class="badge bg-success">Stock Available</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Out of Stock</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Stock Info -->
+                                <div class="mt-3">
+                                    <small class="text-muted d-block mb-2"><strong>Anti-Venom Stock:</strong></small>
+                                    {% for stock in hospital.stock_info %}
+                                        <small class="d-block">
+                                            {{ stock.venom_type }}: 
+                                            <span class="badge bg-{{ 'success' if stock.status == 'available' else 'warning' if stock.status == 'low_stock' else 'danger' }}">
+                                                {{ stock.quantity }} units
+                                            </span>
+                                        </small>
+                                    {% endfor %}
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="mt-3">
+                                    <button class="btn btn-sm btn-primary call-hospital" data-phone="{{ hospital.phone }}">
+                                        <i class="fas fa-phone"></i> Call
+                                    </button>
+                                    <button class="btn btn-sm btn-success get-directions" data-lat="{{ hospital.latitude }}" data-lng="{{ hospital.longitude }}">
+                                        <i class="fas fa-directions"></i> Directions
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info">
+                        Click "Find Hospitals" to search for nearby hospitals with anti-venom availability.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ config.GOOGLE_MAPS_API_KEY or 'AIzaSyDummyKey' }}"></script>
+<script>
+let map;
+let userMarker;
+let hospitalMarkers = [];
+
+function initMap() {
+    // Initialize map centered on India
+    map = L.map('map').setView([20.5937, 78.9629], 5);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    // Get user location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            // Update map center
+            map.setView([lat, lng], 12);
+            
+            // Add user marker
+            userMarker = L.circleMarker([lat, lng], {
+                radius: 8,
+                fillColor: '#007bff',
+                color: '#fff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map).bindPopup('Your Location');
+            
+            // Update location in form
+            document.getElementById('user_lat').value = lat;
+            document.getElementById('user_lng').value = lng;
+        });
+    }
+}
+
+function findHospitals() {
+    if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser');
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(function(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const radius = parseFloat(document.getElementById('search_radius').value);
+        
+        fetch('{{ url_for("user.find_hospitals") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                latitude: latitude,
+                longitude: longitude,
+                radius: radius
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            displayHospitals(data, latitude, longitude);
+        })
+        .catch(error => console.error('Error:', error));
+    });
+}
+
+function displayHospitals(hospitals, userLat, userLng) {
+    // Clear existing markers
+    hospitalMarkers.forEach(marker => map.removeLayer(marker));
+    hospitalMarkers = [];
+    
+    // Add hospital markers
+    hospitals.forEach(hospital => {
+        const marker = L.marker([hospital.latitude, hospital.longitude])
+            .addTo(map)
+            .bindPopup(`
+                <strong>${hospital.name}</strong><br>
+                Phone: ${hospital.phone}<br>
+                Distance: ${hospital.distance} km
+            `);
+        
+        hospitalMarkers.push(marker);
+    });
+    
+    // Fit map to show all markers
+    if (hospitalMarkers.length > 0) {
+        const group = new L.featureGroup([userMarker, ...hospitalMarkers]);
+        map.fitBounds(group.getBounds().pad(0.1));
+    }
+}
+
+// Initialize map on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initMap();
+    
+    document.getElementById('findHospitals').addEventListener('click', findHospitals);
+});
+</script>
+{% endblock %}

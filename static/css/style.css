@@ -1,0 +1,278 @@
+/* Venom_Tracker Custom Styles */
+
+:root {
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-bg: #f8f9fa;
+    --dark-bg: #1a1a1a;
+}
+
+/* Dark Mode */
+body[data-theme="dark"] {
+    background-color: var(--dark-bg);
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .card {
+    background-color: #2a2a2a;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .navbar {
+    background-color: #1a1a1a !important;
+}
+
+body[data-theme="dark"] .bg-light {
+    background-color: #2a2a2a !important;
+}
+
+/* Hero Section */
+.hero-section {
+    border-radius: 0;
+    margin-bottom: 0;
+}
+
+/* Cards */
+.card {
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    background: #f8f9fa;
+    transform: scale(1.02);
+}
+
+/* Hospital Card */
+.hospital-card {
+    border-left: 4px solid var(--primary-color);
+}
+
+.hospital-card.selected {
+    border-left-color: var(--success-color);
+    background-color: #f0f7ff;
+}
+
+/* Map Container */
+#map {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Badges */
+.badge {
+    padding: 0.5rem 0.75rem;
+    font-weight: 500;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+/* Emergency SOS Button */
+.btn-danger.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.25rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    transform: translateX(5px);
+}
+
+/* Alert */
+.alert {
+    border-radius: 0.5rem;
+    border: none;
+}
+
+/* Form Controls */
+.form-control,
+.form-select {
+    border-radius: 0.25rem;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Tables */
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Loading Animation */
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0, 123, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Modal */
+.modal-content {
+    border-radius: 0.5rem;
+    border: none;
+}
+
+.modal-header {
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Sidebar */
+.nav-link {
+    color: #495057;
+    border-left: 3px solid transparent;
+    padding-left: 1rem !important;
+    transition: all 0.2s ease;
+}
+
+.nav-link.active {
+    color: var(--primary-color);
+    background-color: #e7f1ff;
+    border-left-color: var(--primary-color);
+}
+
+.nav-link:hover {
+    color: var(--primary-color);
+}
+
+/* Error Box */
+.error-box {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .btn-danger.btn-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .sidebar {
+        min-height: auto !important;
+    }
+}
+
+/* Utility Classes */
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.text-success {
+    color: var(--success-color) !important;
+}
+
+.text-danger {
+    color: var(--danger-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+/* Leaflet Map Overrides */
+.leaflet-control-attribution {
+    font-size: 11px;
+}
+
+.leaflet-popup-content {
+    font-size: 14px;
+}
