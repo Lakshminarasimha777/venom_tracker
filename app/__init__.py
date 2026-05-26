@@ -54,6 +54,56 @@ def create_app(config_name='development'):
     # Create database tables
     with app.app_context():
         db.create_all()
+        # Initialize default accounts on first run (helpful for fresh deployments)
+        try:
+            should_init = app.config.get('FLASK_ENV') != 'production' or \
+                         (os.getenv('INITIALIZE_SAMPLE_DATA', '').lower() in ('1', 'true', 'yes'))
+
+            # Create a default admin if none exist
+            if should_init and not Admin.query.first():
+                default_admin_username = os.getenv('DEFAULT_ADMIN_USERNAME', 'admin')
+                default_admin_email = os.getenv('DEFAULT_ADMIN_EMAIL', 'admin@example.com')
+                default_admin_password = os.getenv('DEFAULT_ADMIN_PASSWORD', 'admin123')
+                admin = Admin(username=default_admin_username, email=default_admin_email)
+                admin.set_password(default_admin_password)
+                admin.is_super_admin = True
+                db.session.add(admin)
+                db.session.commit()
+                app.logger.info('Default admin account created')
+
+            # Create a demo user if none exist
+            if should_init and not User.query.first():
+                demo_user = User(username='farmer1', email='farmer1@example.com', phone='9876543210')
+                demo_user.set_password('password123')
+                db.session.add(demo_user)
+                db.session.commit()
+                app.logger.info('Demo user account created')
+
+            # Create a demo hospital if none exist
+            if should_init and not Hospital.query.first():
+                demo_hospital = Hospital(
+                    name='City Hospital',
+                    email='city-hospital@example.com',
+                    phone='9123456789',
+                    latitude=17.6868,
+                    longitude=83.2185,
+                    address='Demo address',
+                    district='Demo District',
+                    state='Demo State',
+                    pincode='000000'
+                )
+                demo_hospital.set_password('hospital123')
+                demo_hospital.is_verified = True
+                db.session.add(demo_hospital)
+                db.session.commit()
+                app.logger.info('Demo hospital account created')
+
+        except Exception as e:
+            try:
+                db.session.rollback()
+            except Exception:
+                pass
+            app.logger.error(f'Failed to initialize sample accounts: {e}')
     
     # Index route
     @app.route('/')
