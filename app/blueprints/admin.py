@@ -335,6 +335,153 @@ def unblock_hospital(hospital_id):
         return jsonify({'success': False, 'error': str(e)}), 400
 
 
+@admin_bp.route('/hospital/add', methods=['GET', 'POST'])
+def add_hospital():
+    """Add new hospital"""
+    admin = get_current_admin()
+    if not admin:
+        flash('Please login first', 'danger')
+        return redirect(url_for('auth.login_user_page'))
+    
+    if request.method == 'POST':
+        try:
+            name = request.form.get('name', '').strip()
+            email = request.form.get('email', '').strip()
+            password = request.form.get('password', '')
+            phone = request.form.get('phone', '').strip()
+            address = request.form.get('address', '').strip()
+            district = request.form.get('district', '').strip()
+            state = request.form.get('state', 'Andhra Pradesh').strip()
+            pincode = request.form.get('pincode', '').strip()
+            latitude = float(request.form.get('latitude', 0))
+            longitude = float(request.form.get('longitude', 0))
+            registration_number = request.form.get('registration_number', '').strip()
+            license_number = request.form.get('license_number', '').strip()
+            
+            if not all([name, email, password, phone, address, district, pincode]):
+                flash('All required fields must be filled', 'danger')
+                return redirect(url_for('admin.add_hospital'))
+            
+            if Hospital.query.filter_by(name=name).first():
+                flash('Hospital name already exists', 'danger')
+                return redirect(url_for('admin.add_hospital'))
+            
+            if Hospital.query.filter_by(email=email).first():
+                flash('Email already registered', 'danger')
+                return redirect(url_for('admin.add_hospital'))
+            
+            hospital = Hospital(
+                name=name,
+                email=email,
+                phone=phone,
+                address=address,
+                district=district,
+                state=state,
+                pincode=pincode,
+                latitude=latitude,
+                longitude=longitude,
+                registration_number=registration_number,
+                license_number=license_number,
+                is_verified=True,
+                is_active=True
+            )
+            hospital.set_password(password)
+            
+            db.session.add(hospital)
+            db.session.commit()
+            
+            flash(f'Hospital {name} added successfully', 'success')
+            return redirect(url_for('admin.view_hospital', hospital_id=hospital.id))
+        
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding hospital: {str(e)}', 'danger')
+            return redirect(url_for('admin.add_hospital'))
+    
+    from app.utils import get_districts_list
+    districts = get_districts_list()
+    return render_template('admin/add_hospital.html', admin=admin, districts=districts)
+
+
+@admin_bp.route('/hospital/<int:hospital_id>/edit', methods=['GET', 'POST'])
+def edit_hospital(hospital_id):
+    """Edit hospital"""
+    admin = get_current_admin()
+    if not admin:
+        flash('Please login first', 'danger')
+        return redirect(url_for('auth.login_user_page'))
+    
+    hospital = Hospital.query.get_or_404(hospital_id)
+    
+    if request.method == 'POST':
+        try:
+            hospital.name = request.form.get('name', '').strip()
+            hospital.email = request.form.get('email', '').strip()
+            hospital.phone = request.form.get('phone', '').strip()
+            hospital.address = request.form.get('address', '').strip()
+            hospital.district = request.form.get('district', '').strip()
+            hospital.state = request.form.get('state', '').strip()
+            hospital.pincode = request.form.get('pincode', '').strip()
+            hospital.latitude = float(request.form.get('latitude', hospital.latitude))
+            hospital.longitude = float(request.form.get('longitude', hospital.longitude))
+            hospital.registration_number = request.form.get('registration_number', '').strip()
+            hospital.license_number = request.form.get('license_number', '').strip()
+            
+            password = request.form.get('password', '')
+            if password:
+                hospital.set_password(password)
+            
+            hospital.updated_at = datetime.utcnow()
+            db.session.commit()
+            
+            flash(f'Hospital {hospital.name} updated successfully', 'success')
+            return redirect(url_for('admin.view_hospital', hospital_id=hospital.id))
+        
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating hospital: {str(e)}', 'danger')
+            return redirect(url_for('admin.edit_hospital', hospital_id=hospital_id))
+    
+    from app.utils import get_districts_list
+    districts = get_districts_list()
+    return render_template('admin/edit_hospital.html', admin=admin, hospital=hospital, districts=districts)
+
+
+@admin_bp.route('/hospital/<int:hospital_id>/delete', methods=['POST'])
+def delete_hospital(hospital_id):
+    """Delete hospital"""
+    admin = get_current_admin()
+    if not admin:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    try:
+        hospital = Hospital.query.get_or_404(hospital_id)
+        hospital_name = hospital.name
+        
+        # Delete related venom stocks
+        VenomStock.query.filter_by(hospital_id=hospital.id).delete()
+        
+        # Delete related emergency cases
+        EmergencyCase.query.filter_by(hospital_id=hospital.id).delete()
+        
+        # Delete related notifications
+        Notification.query.filter_by(hospital_id=hospital.id).delete()
+        
+        # Delete hospital
+        db.session.delete(hospital)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Hospital {hospital_name} has been deleted',
+            'redirect': url_for('admin.hospitals')
+        })
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
 @admin_bp.route('/emergency-cases')
 def emergency_cases():
     """View all emergency cases"""

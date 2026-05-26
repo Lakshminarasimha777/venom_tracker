@@ -4,8 +4,10 @@ Hospital dashboard blueprint
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from app.models import db, Hospital, VenomStock, EmergencyCase, Notification
+from app.utils import get_snake_venom_types
 from datetime import datetime, timedelta
-from sqlalchemy import func
+from sqlalchemy import func, or_
+import json
 
 hospital_bp = Blueprint('hospital', __name__, url_prefix='/hospital')
 
@@ -46,8 +48,19 @@ def dashboard():
         is_read=False
     ).all()
     
-    # Get recent emergency cases
-    recent_cases = EmergencyCase.query.filter_by(hospital_id=hospital.id).order_by(
+    # Get recent emergency cases and incoming notified cases
+    notified_rows = db.session.query(Notification.emergency_case_id).filter_by(
+        hospital_id=hospital.id,
+        type='emergency_alert'
+    ).all()
+    notified_case_ids = [row[0] for row in notified_rows if row and row[0]]
+
+    recent_cases = EmergencyCase.query.filter(
+        or_(
+            EmergencyCase.hospital_id == hospital.id,
+            EmergencyCase.id.in_(notified_case_ids)
+        )
+    ).order_by(
         EmergencyCase.created_at.desc()
     ).limit(5).all()
     
@@ -58,7 +71,8 @@ def dashboard():
         total_stock=total_stock,
         pending_cases=pending_cases,
         pending_notifications=pending_notifications,
-        recent_cases=recent_cases
+        recent_cases=recent_cases,
+        venom_types=get_snake_venom_types()
     )
 
 
@@ -126,6 +140,29 @@ def add_stock():
             'success': True,
             'message': 'Stock updated successfully',
             'stock_id': stock.id
+        })
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@hospital_bp.route('/update-venom-availability', methods=['POST'])
+def update_venom_availability():
+    """Update hospital venom availability status"""
+    hospital = get_current_hospital()
+    if not hospital:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    try:
+        venom_types = request.form.getlist('venom_types')
+        hospital.set_available_venom_types(venom_types)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Venom availability updated successfully',
+            'venom_types': venom_types
         })
     
     except Exception as e:

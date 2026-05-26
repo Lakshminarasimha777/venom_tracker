@@ -74,6 +74,45 @@
     </div>
 </section>
 
+<!-- Role Dashboards -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Choose Your Dashboard</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user fa-4x text-primary mb-3"></i>
+                        <h5 class="card-title">User Dashboard</h5>
+                        <p class="card-text">Access your personal emergency dashboard and nearby hospitals.</p>
+                        <a href="{{ url_for('user.dashboard') if session.get('user_type') == 'user' else url_for('auth.login_user_page') }}" class="btn btn-primary">Go to User</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-hospital-user fa-4x text-success mb-3"></i>
+                        <h5 class="card-title">Hospital Dashboard</h5>
+                        <p class="card-text">Manage anti-venom stock and emergency cases for your hospital.</p>
+                        <a href="{{ url_for('hospital.dashboard') if session.get('user_type') == 'hospital' else url_for('auth.login_user_page') }}" class="btn btn-success">Go to Hospital</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-shield fa-4x text-danger mb-3"></i>
+                        <h5 class="card-title">Admin Dashboard</h5>
+                        <p class="card-text">Monitor hospitals, users, and emergency alerts across the network.</p>
+                        <a href="{{ url_for('admin.dashboard') if session.get('user_type') == 'admin' else url_for('auth.login_user_page') }}" class="btn btn-danger">Go to Admin</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Statistics Section -->
 <section class="py-5">
     <div class="container">

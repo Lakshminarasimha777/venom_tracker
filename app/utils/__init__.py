@@ -144,6 +144,20 @@ def get_districts_list():
     ]
 
 
+def get_states_list():
+    """Return list of Indian states and union territories (basic list)."""
+    return [
+        'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+        'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
+        'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya',
+        'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim',
+        'Tamil Nadu', 'Telangana', 'Tripura', 'Uttarakhand', 'Uttar Pradesh',
+        'West Bengal', 'Andaman and Nicobar Islands', 'Chandigarh',
+        'Dadra and Nagar Haveli and Daman and Diu', 'Lakshadweep', 'Delhi',
+        'Puducherry'
+    ]
+
+
 def translate_text(text, language='en'):
     """
     Simple translation for multi-language support
@@ -182,8 +196,17 @@ def send_sms_alert(phone_number, message):
     In production, use Twilio or similar service
     """
     # TODO: Integrate with Twilio or similar service
-    # For now, just log it
     print(f"[SMS] To: {phone_number}, Message: {message}")
+    return True
+
+
+def send_call_alert(phone_number, message):
+    """
+    Simulate call alert (could be replaced with voice/SIP integration)
+    In production, use Twilio Voice or a similar provider.
+    """
+    # TODO: Integrate with Twilio Voice or similar service
+    print(f"[CALL] To: {phone_number}, Message: {message}")
     return True
 
 

@@ -79,9 +79,11 @@ class Hospital(db.Model):
     is_verified = db.Column(db.Boolean, default=False)
     is_active = db.Column(db.Boolean, default=True)
     overall_stock_status = db.Column(db.String(20), default='good')  # good, low, critical
+    venom_types_available = db.Column(db.Text, nullable=True)  # JSON string of available venom types
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_login = db.Column(db.DateTime, nullable=True)  # Track hospital login activity
     
     # Relationships
     venom_stocks = db.relationship('VenomStock', backref='hospital', lazy='dynamic', cascade='all, delete-orphan')
@@ -101,6 +103,29 @@ class Hospital(db.Model):
         return db.session.query(db.func.sum(VenomStock.quantity)).filter(
             VenomStock.hospital_id == self.id
         ).scalar() or 0
+    
+    def get_available_venom_types(self):
+        """Get list of venom types hospital has registered"""
+        if self.venom_types_available:
+            try:
+                return json.loads(self.venom_types_available)
+            except:
+                return []
+
+        # If explicit availability is not set, infer from current stock levels
+        try:
+            venom_types = [stock.venom_type for stock in self.venom_stocks if stock.quantity > 0]
+            return list(dict.fromkeys(venom_types))
+        except Exception:
+            return []
+
+    def set_available_venom_types(self, venom_types):
+        """Set venom types the hospital has"""
+        self.venom_types_available = json.dumps(venom_types)
+    
+    def has_venom_available(self):
+        """Check if hospital has any venom available"""
+        return len(self.get_available_venom_types()) > 0
     
     def __repr__(self):
         return f'<Hospital {self.name}>'

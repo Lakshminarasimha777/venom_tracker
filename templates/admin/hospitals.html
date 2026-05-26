@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Hospitals - Venom_Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-hospital"></i> Manage Hospitals</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('admin.add_hospital') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add New Hospital
+            </a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Filter Options -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" name="search" placeholder="Search by name or district..." value="{{ search or '' }}">
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" name="status">
+                        <option value="all" {% if status == 'all' %}selected{% endif %}>All Hospitals</option>
+                        <option value="verified" {% if status == 'verified' %}selected{% endif %}>Verified</option>
+                        <option value="unverified" {% if status == 'unverified' %}selected{% endif %}>Unverified</option>
+                        <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hospitals Table -->
+    <div class="card shadow">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Hospital Name</th>
+                        <th>Email</th>
+                        <th>District</th>
+                        <th>Status</th>
+                        <th>Verified</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if hospitals.items %}
+                        {% for hospital in hospitals.items %}
+                            <tr>
+                                <td>
+                                    <strong>{{ hospital.name }}</strong>
+                                </td>
+                                <td>{{ hospital.email }}</td>
+                                <td>{{ hospital.district }}</td>
+                                <td>
+                                    {% if hospital.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if hospital.is_verified %}
+                                        <span class="badge bg-info">Verified</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('admin.view_hospital', hospital_id=hospital.id) }}" class="btn btn-sm btn-info" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('admin.edit_hospital', hospital_id=hospital.id) }}" class="btn btn-sm btn-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteHospital({{ hospital.id }}, '{{ hospital.name }}')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox"></i> No hospitals found
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if hospitals.pages > 1 %}
+        <nav class="mt-4" aria-label="Page navigation">
+            <ul class="pagination">
+                {% if hospitals.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.hospitals', page=hospitals.prev_num, search=search, status=status) }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                {% for page_num in hospitals.iter_pages() %}
+                    {% if page_num %}
+                        <li class="page-item {% if page_num == hospitals.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin.hospitals', page=page_num, search=search, status=status) }}">{{ page_num }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if hospitals.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.hospitals', page=hospitals.next_num, search=search, status=status) }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+
+<script>
+function deleteHospital(hospitalId, hospitalName) {
+    if (confirm(`Are you sure you want to delete "${hospitalName}"? This action cannot be undone.`)) {
+        fetch(`/admin/hospital/${hospitalId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                window.location.href = data.redirect;
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => alert('Error: ' + error));
+    }
+}
+</script>
+{% endblock %}

@@ -21,6 +21,15 @@
                         <label for="search_radius" class="form-label">Search Radius (km)</label>
                         <input type="number" class="form-control" id="search_radius" value="50" min="5" max="100">
                     </div>
+                    <div class="mb-3">
+                        <label for="venom_filter" class="form-label">Filter by Venom Type (Optional)</label>
+                        <select class="form-select" id="venom_filter">
+                            <option value="">All Venom Types</option>
+                            {% for venom_type in venom_types %}
+                                <option value="{{ venom_type }}">{{ venom_type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <button class="btn btn-primary w-100" id="findHospitals">
                         <i class="fas fa-search"></i> Find Hospitals
                     </button>
@@ -51,6 +60,20 @@
                                             <span class="badge bg-danger">Out of Stock</span>
                                         {% endif %}
                                     </div>
+                                </div>
+                                
+                                <!-- Venom Types Available -->
+                                <div class="mt-3">
+                                    <small class="text-muted d-block mb-2"><strong>Venom Types Available:</strong></small>
+                                    {% if hospital.venom_types_available %}
+                                        <div>
+                                            {% for venom_type in hospital.venom_types_available %}
+                                                <span class="badge bg-info me-2 mb-2">{{ venom_type }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <small class="text-muted">No venom types registered</small>
+                                    {% endif %}
                                 </div>
                                 
                                 <!-- Stock Info -->
@@ -91,7 +114,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://maps.googleapis.com/maps/api/js?key={{ config.GOOGLE_MAPS_API_KEY or 'AIzaSyDummyKey' }}"></script>
 <script>
 let map;
 let userMarker;
@@ -124,10 +146,6 @@ function initMap() {
                 opacity: 1,
                 fillOpacity: 0.8
             }).addTo(map).bindPopup('Your Location');
-            
-            // Update location in form
-            document.getElementById('user_lat').value = lat;
-            document.getElementById('user_lng').value = lng;
         });
     }
 }
@@ -142,6 +160,7 @@ function findHospitals() {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
         const radius = parseFloat(document.getElementById('search_radius').value);
+        const venomFilter = document.getElementById('venom_filter').value;
         
         fetch('{{ url_for("user.find_hospitals") }}', {
             method: 'POST',
@@ -151,14 +170,107 @@ function findHospitals() {
             body: JSON.stringify({
                 latitude: latitude,
                 longitude: longitude,
-                radius: radius
+                radius: radius,
+                venom_filter: venomFilter
             })
         })
         .then(response => response.json())
         .then(data => {
-            displayHospitals(data, latitude, longitude);
+            // Filter hospitals by selected venom type if specified
+            let filteredData = data;
+            if (venomFilter) {
+                filteredData = data.filter(hospital => 
+                    hospital.venom_types_available && hospital.venom_types_available.includes(venomFilter)
+                );
+            }
+            displayHospitals(filteredData, latitude, longitude);
+            renderHospitalsList(filteredData);
         })
         .catch(error => console.error('Error:', error));
+    });
+}
+
+function renderHospitalsList(hospitals) {
+    const hospitalsList = document.getElementById('hospitalsList');
+
+    if (!hospitals || hospitals.length === 0) {
+        hospitalsList.innerHTML = `
+            <div class="alert alert-info">
+                No hospitals found within the selected radius. Try increasing the radius or changing the venom type.
+            </div>
+        `;
+        return;
+    }
+
+    hospitalsList.innerHTML = hospitals.map(hospital => `
+        <div class="card mb-3 border-0 shadow-sm hospital-card" data-hospital-id="${hospital.id}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="card-title">${hospital.name}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-map-marker-alt"></i> ${hospital.distance} km away
+                        </p>
+                        <p class="card-text">${hospital.address}</p>
+                        <p class="mb-2">
+                            <i class="fas fa-phone"></i> <a href="tel:${hospital.phone}">${hospital.phone}</a>
+                        </p>
+                    </div>
+                    <div class="text-end">
+                        ${hospital.total_stock > 0 ? '<span class="badge bg-success">Stock Available</span>' : '<span class="badge bg-danger">Out of Stock</span>'}
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted d-block mb-2"><strong>Venom Types Available:</strong></small>
+                    ${hospital.venom_types_available && hospital.venom_types_available.length > 0 ?
+                        hospital.venom_types_available.map(type => `<span class="badge bg-info me-2 mb-2">${type}</span>`).join('') :
+                        '<small class="text-muted">No venom types registered</small>'
+                    }
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted d-block mb-2"><strong>Anti-Venom Stock:</strong></small>
+                    ${hospital.stock_info.map(stock => `
+                        <small class="d-block">
+                            ${stock.venom_type}: 
+                            <span class="badge bg-${stock.status === 'available' ? 'success' : stock.status === 'low_stock' ? 'warning' : 'danger'}">
+                                ${stock.quantity} units
+                            </span>
+                        </small>
+                    `).join('')}
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-sm btn-primary call-hospital" data-phone="${hospital.phone}">
+                        <i class="fas fa-phone"></i> Call
+                    </button>
+                    <button class="btn btn-sm btn-success get-directions" data-lat="${hospital.latitude}" data-lng="${hospital.longitude}">
+                        <i class="fas fa-directions"></i> Directions
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    attachListActionHandlers();
+}
+
+function attachListActionHandlers() {
+    document.querySelectorAll('.get-directions').forEach(button => {
+        button.addEventListener('click', function() {
+            const lat = this.dataset.lat;
+            const lng = this.dataset.lng;
+            if (lat && lng) {
+                window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(lat + ',' + lng)}`, '_blank');
+            }
+        });
+    });
+
+    document.querySelectorAll('.call-hospital').forEach(button => {
+        button.addEventListener('click', function() {
+            const phone = this.dataset.phone;
+            if (phone) {
+                window.location.href = `tel:${phone}`;
+            }
+        });
     });
 }
 
@@ -182,7 +294,8 @@ function displayHospitals(hospitals, userLat, userLng) {
     
     // Fit map to show all markers
     if (hospitalMarkers.length > 0) {
-        const group = new L.featureGroup([userMarker, ...hospitalMarkers]);
+        const markers = userMarker ? [userMarker, ...hospitalMarkers] : hospitalMarkers;
+        const group = new L.featureGroup(markers);
         map.fitBounds(group.getBounds().pad(0.1));
     }
 }

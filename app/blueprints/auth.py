@@ -5,8 +5,10 @@ Authentication blueprint for user registration and login
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import login_user, logout_user, current_user
 from app.models import db, User, Hospital, Admin
+from app.utils import get_districts_list, get_snake_venom_types, get_states_list
 from werkzeug.security import generate_password_hash
 from datetime import datetime
+import json
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -96,6 +98,8 @@ def login_user_page():
                     hospital = Hospital.query.filter_by(email=username).first()
                 
                 if hospital and hospital.check_password(password) and hospital.is_active:
+                    hospital.last_login = datetime.utcnow()
+                    db.session.commit()
                     session['hospital_id'] = hospital.id
                     session['user_type'] = 'hospital'
                     flash(f'Welcome back, {hospital.name}!', 'success')
@@ -133,10 +137,19 @@ def register_hospital():
         district = request.form.get('district', '').strip()
         state = request.form.get('state', 'Andhra Pradesh').strip()
         pincode = request.form.get('pincode', '').strip()
-        latitude = request.form.get('latitude', '0')
-        longitude = request.form.get('longitude', '0')
+        latitude = request.form.get('latitude', '').strip()
+        longitude = request.form.get('longitude', '').strip()
         registration_number = request.form.get('registration_number', '').strip()
         license_number = request.form.get('license_number', '').strip()
+        
+        # Get selected venom types
+        venom_types = request.form.getlist('venom_types')
+        
+        def parse_coordinate(value):
+            try:
+                return float(value)
+            except (ValueError, TypeError):
+                return 0.0
         
         # Validation
         if not all([name, email, password, phone, address, district]):
@@ -170,10 +183,11 @@ def register_hospital():
                 district=district,
                 state=state,
                 pincode=pincode,
-                latitude=float(latitude) if latitude != '0' else 0.0,
-                longitude=float(longitude) if longitude != '0' else 0.0,
+                latitude=parse_coordinate(latitude),
+                longitude=parse_coordinate(longitude),
                 registration_number=registration_number,
-                license_number=license_number
+                license_number=license_number,
+                venom_types_available=json.dumps(venom_types) if venom_types else json.dumps([])
             )
             hospital.set_password(password)
             
@@ -188,7 +202,10 @@ def register_hospital():
             flash(f'Registration failed: {str(e)}', 'danger')
             return redirect(url_for('auth.register_hospital'))
     
-    return render_template('auth/register_hospital.html')
+    districts = get_districts_list()
+    venom_types = get_snake_venom_types()
+    states = get_states_list()
+    return render_template('auth/register_hospital.html', districts=districts, venom_types=venom_types, states=states)
 
 
 @auth_bp.route('/logout')

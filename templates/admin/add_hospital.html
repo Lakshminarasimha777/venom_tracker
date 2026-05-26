@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Add Hospital - Venom_Tracker{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-hospital"></i> Add New Hospital</h5>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" class="needs-validation">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Hospital Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="address" name="address" rows="2" required></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="district" class="form-label">District <span class="text-danger">*</span></label>
+                                <select class="form-select" id="district" name="district" required>
+                                    <option value="">Select District</option>
+                                    {% for d in districts %}
+                                        <option value="{{ d }}">{{ d }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="state" class="form-label">State</label>
+                                <input type="text" class="form-control" id="state" name="state" value="Andhra Pradesh">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="pincode" class="form-label">Pincode <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="pincode" name="pincode" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="latitude" class="form-label">Latitude</label>
+                                <input type="number" class="form-control" id="latitude" name="latitude" step="0.0001">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="longitude" class="form-label">Longitude</label>
+                                <input type="number" class="form-control" id="longitude" name="longitude" step="0.0001">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="registration_number" class="form-label">Registration Number</label>
+                                <input type="text" class="form-control" id="registration_number" name="registration_number">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="license_number" class="form-label">License Number</label>
+                            <input type="text" class="form-control" id="license_number" name="license_number">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plus"></i> Add Hospital
+                            </button>
+                            <a href="{{ url_for('admin.hospitals') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

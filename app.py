@@ -9,7 +9,21 @@ Usage:
 
 import os
 import sys
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except Exception:
+    print('\nMissing dependency: python-dotenv')
+    print('You are running the system Python which does not have the project dependencies installed.')
+    print('Run the app with the project virtualenv or install dependencies:')
+    print('\nPowershell (activate venv):')
+    print('  .\\mln\\Scripts\\Activate.ps1')
+    print('  python app.py')
+    print('\nOr run directly with the venv Python:')
+    print('  .\\mln\\Scripts\\python.exe app.py')
+    print('\nOr install dependencies into the current Python:')
+    print('  pip install -r requirements.txt')
+    sys.exit(1)
+
 from app import create_app, db
 from app.models import User, Hospital, Admin, EmergencyCase, VenomStock, Notification
 

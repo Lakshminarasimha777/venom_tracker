@@ -45,14 +45,19 @@
                                 <label for="district" class="form-label">District *</label>
                                 <select class="form-select" id="district" name="district" required>
                                     <option value="">Select district</option>
-                                    <option>Visakhapatnam</option>
-                                    <option>Vizianagaram</option>
-                                    <option>Srikakulam</option>
+                                    {% for district in districts %}
+                                    <option value="{{ district }}">{{ district }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="state" class="form-label">State *</label>
-                                <input type="text" class="form-control" id="state" name="state" value="Andhra Pradesh" required>
+                                    <label for="state" class="form-label">State *</label>
+                                    <select class="form-select" id="state" name="state" required>
+                                        <option value="">Select state</option>
+                                        {% for st in states %}
+                                            <option value="{{ st }}" {% if st == 'Andhra Pradesh' %}selected{% endif %}>{{ st }}</option>
+                                        {% endfor %}
+                                    </select>
                             </div>
                         </div>
                         
@@ -84,6 +89,22 @@
                                 <label for="license_number" class="form-label">License Number</label>
                                 <input type="text" class="form-control" id="license_number" name="license_number" placeholder="Hospital license number">
                             </div>
+                        </div>
+                        
+                        <!-- Venom Types Available -->
+                        <div class="mb-3">
+                            <label class="form-label">Anti-Venom Types Available *</label>
+                            <div class="border p-3 rounded bg-light">
+                                {% for venom_type in venom_types %}
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="venom_{{ loop.index }}" name="venom_types" value="{{ venom_type }}">
+                                        <label class="form-check-label" for="venom_{{ loop.index }}">
+                                            {{ venom_type }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <small class="form-text text-muted">Select at least one venom type your hospital has in stock</small>
                         </div>
                         
                         <!-- Password -->
@@ -125,4 +146,49 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const stateSelect = document.getElementById('state');
+    const districtSelect = document.getElementById('district');
+    const apDistricts = {{ districts|tojson|safe }};
+
+    function populateDistrictsForState(state){
+        districtSelect.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = state ? 'Select district' : 'Select state first';
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        districtSelect.appendChild(placeholder);
+
+        if(state === 'Andhra Pradesh'){
+            apDistricts.forEach(function(d){
+                const opt = document.createElement('option');
+                opt.value = d;
+                opt.textContent = d;
+                districtSelect.appendChild(opt);
+            });
+            districtSelect.disabled = false;
+        } else if (state){
+            const infoOpt = document.createElement('option');
+            infoOpt.textContent = 'Districts will be added later';
+            infoOpt.disabled = true;
+            districtSelect.appendChild(infoOpt);
+            districtSelect.disabled = false;
+        } else {
+            districtSelect.disabled = true;
+        }
+    }
+
+    stateSelect.addEventListener('change', function(){
+        populateDistrictsForState(this.value);
+    });
+
+    // initialize on load
+    populateDistrictsForState(stateSelect.value || 'Andhra Pradesh');
+});
+</script>
 {% endblock %}

@@ -95,6 +95,35 @@
                 </div>
             </div>
             
+            <!-- Venom Availability Section -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fas fa-syringe"></i> Venom Availability Status
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="venom-display">
+                                {% if hospital.get_available_venom_types() %}
+                                    <div class="mb-3">
+                                        {% for venom in hospital.get_available_venom_types() %}
+                                            <span class="badge bg-success me-2 mb-2">{{ venom }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted">No venom types registered yet</p>
+                                {% endif %}
+                            </div>
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editVenomModal">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Recent Cases -->
             <div class="row">
                 <div class="col-12">
@@ -148,4 +177,64 @@
         </div>
     </div>
 </div>
+
+<!-- Edit Venom Availability Modal -->
+<div class="modal fade" id="editVenomModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Venom Availability</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="venomForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Select Available Venom Types *</label>
+                        <div class="border p-3 rounded bg-light" style="max-height: 300px; overflow-y: auto;">
+                            {% for venom_type in venom_types %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="venom_edit_{{ loop.index }}" name="venom_types" value="{{ venom_type }}"
+                                        {% if venom_type in hospital.get_available_venom_types() %}checked{% endif %}>
+                                    <label class="form-check-label" for="venom_edit_{{ loop.index }}">
+                                        {{ venom_type }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('venomForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    fetch('{{ url_for("hospital.update_venom_availability") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Venom availability updated successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred');
+    });
+});
+</script>
+
 {% endblock %}
