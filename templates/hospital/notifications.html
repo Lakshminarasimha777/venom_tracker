@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - {{ hospital.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 bg-light py-3" style="min-height: calc(100vh - 100px);">
+            <nav class="nav flex-column">
+                <a class="nav-link" href="{{ url_for('hospital.dashboard') }}">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a class="nav-link" href="{{ url_for('hospital.emergency_cases') }}">
+                    <i class="fas fa-exclamation-circle"></i> Emergency Cases
+                </a>
+                <a class="nav-link" href="{{ url_for('hospital.stock') }}">
+                    <i class="fas fa-boxes"></i> Stock Management
+                </a>
+                <a class="nav-link" href="{{ url_for('hospital.analytics') }}">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+                <a class="nav-link active" href="{{ url_for('hospital.notifications') }}">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+                <a class="nav-link" href="{{ url_for('hospital.settings') }}">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </nav>
+        </div>
+
+        <div class="col-md-10 py-4">
+            <div class="mb-4">
+                <h1>Notifications</h1>
+                <p class="text-muted">Recent notifications for {{ hospital.name }}</p>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    {% if notifications.items %}
+                        <div class="list-group">
+                            {% for notification in notifications.items %}
+                                <div class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ notification.title }}</h6>
+                                        <p class="mb-1">{{ notification.message }}</p>
+                                        <small class="text-muted">{{ notification.created_at.strftime('%d-%m-%Y %H:%M') }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        {% if not notification.is_read %}
+                                            <span class="badge bg-warning mb-2">Unread</span>
+                                        {% else %}
+                                            <span class="badge bg-success mb-2">Read</span>
+                                        {% endif %}
+                                        <form method="post" action="{{ url_for('hospital.mark_notification_read', notif_id=notification.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">Mark read</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <nav aria-label="Notification pagination" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if notifications.has_prev %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('hospital.notifications', page=notifications.prev_num) }}">Previous</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                                {% endif %}
+                                {% for page_num in range(1, notifications.pages + 1) %}
+                                    <li class="page-item {% if notifications.page == page_num %}active{% endif %}">
+                                        <a class="page-link" href="{{ url_for('hospital.notifications', page=page_num) }}">{{ page_num }}</a>
+                                    </li>
+                                {% endfor %}
+                                {% if notifications.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('hospital.notifications', page=notifications.next_num) }}">Next</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% else %}
+                        <p class="text-muted mb-0">No notifications available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

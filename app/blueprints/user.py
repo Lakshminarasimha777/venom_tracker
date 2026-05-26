@@ -41,9 +41,6 @@ def dashboard():
     nearby_hospitals = []
     nearby_count = 0
 
-    # Allow showing unverified hospitals when enabled in config (useful for testing)
-    show_unverified = current_app.config.get('SHOW_UNVERIFIED_HOSPITALS', False)
-
     def add_hospital_entry(hospital, distance=None):
         stocks = VenomStock.query.filter_by(hospital_id=hospital.id).all()
         stock_info = []
@@ -74,10 +71,7 @@ def dashboard():
         })
 
     if user.latitude is not None and user.longitude is not None:
-        if show_unverified:
-            hospitals = Hospital.query.filter_by(is_active=True).all()
-        else:
-            hospitals = Hospital.query.filter_by(is_active=True, is_verified=True).all()
+        hospitals = Hospital.query.filter_by(is_active=True).all()
         nearby_list = get_nearby_hospitals(
             {'latitude': user.latitude, 'longitude': user.longitude},
             hospitals,
@@ -91,14 +85,7 @@ def dashboard():
             add_hospital_entry(hospital, distance=item['distance'])
 
         if not nearby_hospitals and user.district:
-            if show_unverified:
-                hospitals = Hospital.query.filter_by(is_active=True, district=user.district).all()
-            else:
-                hospitals = Hospital.query.filter_by(
-                    is_active=True,
-                    is_verified=True,
-                    district=user.district
-                ).all()
+            hospitals = Hospital.query.filter_by(is_active=True, district=user.district).all()
             for hospital in hospitals:
                 if not hospital.has_venom_available():
                     continue
@@ -106,24 +93,14 @@ def dashboard():
                 add_hospital_entry(hospital, distance=round(distance, 2))
 
     if not nearby_hospitals and user.district:
-        if show_unverified:
-            hospitals = Hospital.query.filter_by(is_active=True, district=user.district).all()
-        else:
-            hospitals = Hospital.query.filter_by(
-                is_active=True,
-                is_verified=True,
-                district=user.district
-            ).all()
+        hospitals = Hospital.query.filter_by(is_active=True, district=user.district).all()
         for hospital in hospitals:
             if not hospital.has_venom_available():
                 continue
             add_hospital_entry(hospital)
 
     if not nearby_hospitals:
-        if show_unverified:
-            hospitals = Hospital.query.filter_by(is_active=True).all()
-        else:
-            hospitals = Hospital.query.filter_by(is_active=True, is_verified=True).all()
+        hospitals = Hospital.query.filter_by(is_active=True).all()
         for hospital in hospitals:
             if not hospital.has_venom_available():
                 continue
@@ -178,8 +155,8 @@ def find_hospitals():
                 'village': user.village or ''
             }
             
-            # Get all verified active hospitals
-            hospitals = Hospital.query.filter_by(is_active=True, is_verified=True).all()
+            # Get all active hospitals, showing pending verification too
+            hospitals = Hospital.query.filter_by(is_active=True).all()
             
             # Find nearby hospitals
             nearby_list = get_nearby_hospitals(user_location, hospitals, search_radius)

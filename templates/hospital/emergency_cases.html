@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Emergency Cases - {{ hospital.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 bg-light py-3" style="min-height: calc(100vh - 100px);">
+            <nav class="nav flex-column">
+                <a class="nav-link" href="{{ url_for('hospital.dashboard') }}">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a class="nav-link active" href="{{ url_for('hospital.emergency_cases') }}">
+                    <i class="fas fa-exclamation-circle"></i> Emergency Cases
+                </a>
+                <a class="nav-link" href="{{ url_for('hospital.stock') }}">
+                    <i class="fas fa-boxes"></i> Stock Management
+                </a>
+                <a class="nav-link" href="{{ url_for('hospital.analytics') }}">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+                <a class="nav-link" href="{{ url_for('hospital.notifications') }}">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+                <a class="nav-link" href="{{ url_for('hospital.settings') }}">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </nav>
+        </div>
+
+        <div class="col-md-10 py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1>Emergency Cases</h1>
+                    <p class="text-muted">Cases assigned to {{ hospital.name }}</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('hospital.dashboard') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="btn-group" role="group">
+                    {% for status_item in ['all', 'pending', 'accepted', 'completed', 'rejected'] %}
+                        <a href="{{ url_for('hospital.emergency_cases', status=status_item) }}"
+                           class="btn btn-sm {% if current_status == status_item %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                            {{ status_item|capitalize }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    {% if cases.items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Date</th>
+                                        <th>Patient</th>
+                                        <th>Snake Type</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for case in cases.items %}
+                                        <tr>
+                                            <td>#{{ case.id }}</td>
+                                            <td>{{ case.created_at.strftime('%d-%m-%Y %H:%M') }}</td>
+                                            <td>{{ case.user.username if case.user else 'Unknown' }}</td>
+                                            <td>{{ case.snake_type or 'Unknown' }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if case.status == 'completed' else 'info' if case.status == 'accepted' else 'warning' if case.status == 'pending' else 'danger' }}">
+                                                    {{ case.status|capitalize }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('hospital.view_case', case_id=case.id) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <nav aria-label="Case pagination">
+                            <ul class="pagination justify-content-center mt-4">
+                                {% if cases.has_prev %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('hospital.emergency_cases', status=current_status, page=cases.prev_num) }}">Previous</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                                {% endif %}
+                                {% for page_num in range(1, cases.pages + 1) %}
+                                    <li class="page-item {% if cases.page == page_num %}active{% endif %}">
+                                        <a class="page-link" href="{{ url_for('hospital.emergency_cases', status=current_status, page=page_num) }}">{{ page_num }}</a>
+                                    </li>
+                                {% endfor %}
+                                {% if cases.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('hospital.emergency_cases', status=current_status, page=cases.next_num) }}">Next</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% else %}
+                        <p class="text-muted mb-0">No emergency cases found for this status.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

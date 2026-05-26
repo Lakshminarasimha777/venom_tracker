@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Emergency Cases - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 bg-light py-3" style="min-height: calc(100vh - 100px);">
+            <nav class="nav flex-column">
+                <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a class="nav-link" href="{{ url_for('admin.hospitals') }}">
+                    <i class="fas fa-hospital"></i> Hospitals
+                </a>
+                <a class="nav-link" href="{{ url_for('admin.users') }}">
+                    <i class="fas fa-users"></i> Users
+                </a>
+                <a class="nav-link active" href="{{ url_for('admin.emergency_cases') }}">
+                    <i class="fas fa-exclamation-circle"></i> Emergency Cases
+                </a>
+                <a class="nav-link" href="{{ url_for('admin.analytics') }}">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+            </nav>
+        </div>
+
+        <div class="col-md-10 py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1>Emergency Cases</h1>
+                    <p class="text-muted">Review all reported emergency cases across hospitals.</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="btn-group" role="group" aria-label="Case filters">
+                    {% for status_option in ['all', 'pending', 'accepted', 'completed', 'rejected'] %}
+                        <a href="{{ url_for('admin.emergency_cases', status=status_option) }}"
+                           class="btn btn-sm {% if status == status_option %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                            {{ status_option|capitalize }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    {% if cases.items %}
+                        <div class="table-responsive">
+                            <table class="table table-striped align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th>Patient</th>
+                                        <th>Hospital</th>
+                                        <th>Snake Type</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for case in cases.items %}
+                                        <tr>
+                                            <td>{{ case.id }}</td>
+                                            <td>{{ case.created_at.strftime('%d-%m-%Y %H:%M') }}</td>
+                                            <td>{{ case.user.username if case.user else 'Unknown' }}</td>
+                                            <td>{{ case.hospital.name if case.hospital else 'Unknown' }}</td>
+                                            <td>{{ case.snake_type or 'Unknown' }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if case.status == 'completed' else 'info' if case.status == 'accepted' else 'warning' if case.status == 'pending' else 'danger' }}">
+                                                    {{ case.status|capitalize }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <nav aria-label="Case pagination" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if cases.has_prev %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('admin.emergency_cases', status=status, page=cases.prev_num) }}">Previous</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                                {% endif %}
+
+                                {% for page_num in range(1, cases.pages + 1) %}
+                                    <li class="page-item {% if cases.page == page_num %}active{% endif %}">
+                                        <a class="page-link" href="{{ url_for('admin.emergency_cases', status=status, page=page_num) }}">{{ page_num }}</a>
+                                    </li>
+                                {% endfor %}
+
+                                {% if cases.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('admin.emergency_cases', status=status, page=cases.next_num) }}">Next</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% else %}
+                        <p class="text-muted mb-0">No emergency cases found for this filter.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
