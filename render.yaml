@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: venom-tracker
+    env: python
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /
+    autoDeploy: true
+    instanceType: starter
