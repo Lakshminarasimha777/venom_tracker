@@ -220,8 +220,7 @@ function deleteHospital(hospitalId, hospitalName) {
         fetch(`/admin/hospital/${hospitalId}/delete`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
+                'Content-Type': 'application/json'
             }
         })
         .then(response => response.json())
