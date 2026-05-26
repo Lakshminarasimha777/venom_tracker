@@ -5,6 +5,13 @@ services:
     branch: main
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        value: change-me-in-production
+      - key: FLASK_ENV
+        value: production
+      - key: DEBUG
+        value: 'False'
     healthCheckPath: /
     autoDeploy: true
     instanceType: starter

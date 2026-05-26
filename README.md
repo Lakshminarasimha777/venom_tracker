@@ -115,6 +115,10 @@ cp .env.example .env
 
 # Edit .env with your configuration
 # At minimum, set SECRET_KEY and JWT_SECRET_KEY
+# For production or Render deployment:
+# FLASK_ENV=production
+# DEBUG=False
+# Optionally use DATABASE_URL for Postgres when ready
 ```
 
 #### 5. Initialize Database
@@ -128,6 +132,8 @@ flask db upgrade
 # Or use the built-in command
 flask init-db
 ```
+
+> Note: If you deploy to Render, set the environment variables in the Render dashboard instead of relying on a local `.env` file.
 
 #### 6. Seed Sample Data
 ```bash

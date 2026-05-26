@@ -6,11 +6,20 @@ Supports different environments: development, testing, production
 import os
 from datetime import timedelta
 
+
+def env_bool(var_name, default=False):
+    """Parse boolean environment variables from strings."""
+    value = os.getenv(var_name)
+    if value is None:
+        return default
+    return value.lower() in ('1', 'true', 'yes', 'on')
+
+
 class Config:
     """Base configuration"""
     # Flask settings
     FLASK_ENV = os.getenv('FLASK_ENV', 'development')
-    DEBUG = os.getenv('DEBUG', False)
+    DEBUG = env_bool('DEBUG', False)
     TESTING = False
     
     # Database
@@ -21,7 +30,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Session
-    SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', True)
+    SESSION_COOKIE_SECURE = env_bool('SESSION_COOKIE_SECURE', True)
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
@@ -39,7 +48,7 @@ class Config:
     # Email Configuration
     MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.getenv('MAIL_PORT', 587))
-    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', True)
+    MAIL_USE_TLS = env_bool('MAIL_USE_TLS', True)
     MAIL_USERNAME = os.getenv('MAIL_USERNAME', '')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', '')
     
