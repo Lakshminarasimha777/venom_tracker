@@ -63,6 +63,8 @@ class Config:
     
     # Search settings
     MAX_SEARCH_RADIUS_KM = 50  # Maximum search radius for hospitals
+    # Allow showing unverified hospitals in user-facing lists (useful for testing)
+    SHOW_UNVERIFIED_HOSPITALS = env_bool('SHOW_UNVERIFIED_HOSPITALS', False)
 
 
 class DevelopmentConfig(Config):
