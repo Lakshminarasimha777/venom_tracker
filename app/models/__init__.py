@@ -191,6 +191,8 @@ class EmergencyCase(db.Model):
     def __repr__(self):
         return f'<EmergencyCase {self.id}>'
 
+
+
 class Admin(db.Model):
     """Admin user model"""
     __tablename__ = 'admins'
@@ -218,8 +220,6 @@ class Admin(db.Model):
     
     def __repr__(self):
         return f'<Admin {self.username}>'
-
-
 
 class Notification(db.Model):
     """Notification system"""
