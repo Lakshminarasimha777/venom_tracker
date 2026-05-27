@@ -1,18 +1,22 @@
 """
-Authentication blueprint for user registration and login
+Authentication blueprint for Venom_Tracker
+User, Hospital, Admin login & registration
 """
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import login_user, logout_user
-from app.models import db, User, Hospital, Admin
-from app.utils import get_districts_list, get_snake_venom_types, get_states_list
 from datetime import datetime
 import json
+
+from app.models import db, User, Hospital, Admin
+from app.utils import get_districts_list, get_snake_venom_types, get_states_list
 
 auth_bp = Blueprint('auth', __name__)
 
 
-# ---------------- USER REGISTER ----------------
+# =========================
+# USER REGISTER
+# =========================
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register_user():
     if request.method == 'POST':
@@ -39,24 +43,32 @@ def register_user():
             flash('Email already exists', 'danger')
             return redirect(url_for('auth.register_user'))
 
-        user = User(
-            username=username,
-            email=email,
-            phone=phone,
-            district=district
-        )
-        user.set_password(password)
+        try:
+            user = User(
+                username=username,
+                email=email,
+                phone=phone,
+                district=district
+            )
+            user.set_password(password)
 
-        db.session.add(user)
-        db.session.commit()
+            db.session.add(user)
+            db.session.commit()
 
-        flash('Registration successful. Login now.', 'success')
-        return redirect(url_for('auth.login'))
+            flash('Registration successful. Please login.', 'success')
+            return redirect(url_for('auth.login'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Registration failed: {str(e)}', 'danger')
+            return redirect(url_for('auth.register_user'))
 
     return render_template('auth/register.html')
 
 
-# ---------------- LOGIN ----------------
+# =========================
+# LOGIN (USER / HOSPITAL / ADMIN)
+# =========================
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -69,7 +81,6 @@ def login():
             return redirect(url_for('auth.login'))
 
         try:
-
             # ---------------- USER LOGIN ----------------
             if user_type == 'user':
                 user = User.query.filter_by(username=username).first()
@@ -102,17 +113,20 @@ def login():
                     session['admin_id'] = admin.id
                     return redirect(url_for('admin.dashboard'))
 
-            flash('Invalid credentials', 'danger')
+            flash('Invalid credentials or inactive account', 'danger')
             return redirect(url_for('auth.login'))
 
         except Exception as e:
+            db.session.rollback()
             flash(f'Login error: {str(e)}', 'danger')
             return redirect(url_for('auth.login'))
 
     return render_template('auth/login.html')
 
 
-# ---------------- HOSPITAL REGISTER ----------------
+# =========================
+# HOSPITAL REGISTER
+# =========================
 @auth_bp.route('/hospital-register', methods=['GET', 'POST'])
 def register_hospital():
     if request.method == 'POST':
@@ -144,23 +158,29 @@ def register_hospital():
             flash('Email already exists', 'danger')
             return redirect(url_for('auth.register_hospital'))
 
-        hospital = Hospital(
-            name=name,
-            email=email,
-            phone=phone,
-            address=address,
-            district=district,
-            state=state,
-            pincode=pincode,
-            venom_types_available=json.dumps(venom_types)
-        )
-        hospital.set_password(password)
+        try:
+            hospital = Hospital(
+                name=name,
+                email=email,
+                phone=phone,
+                address=address,
+                district=district,
+                state=state,
+                pincode=pincode,
+                venom_types_available=json.dumps(venom_types)
+            )
+            hospital.set_password(password)
 
-        db.session.add(hospital)
-        db.session.commit()
+            db.session.add(hospital)
+            db.session.commit()
 
-        flash('Hospital registered successfully', 'success')
-        return redirect(url_for('auth.login'))
+            flash('Hospital registered successfully. Await admin approval.', 'success')
+            return redirect(url_for('auth.login'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Registration failed: {str(e)}', 'danger')
+            return redirect(url_for('auth.register_hospital'))
 
     districts = get_districts_list()
     venom_types = get_snake_venom_types()
@@ -174,11 +194,12 @@ def register_hospital():
     )
 
 
-# ---------------- LOGOUT ----------------
+# =========================
+# LOGOUT
+# =========================
 @auth_bp.route('/logout')
 def logout():
     logout_user()
     session.clear()
     flash('Logged out successfully', 'info')
     return redirect(url_for('auth.login'))
-      
