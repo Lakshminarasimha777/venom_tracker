@@ -193,31 +193,32 @@ class EmergencyCase(db.Model):
 
 
 
-class Admin(db.Model):
+class Admin(UserMixin, db.Model):
     """Admin user model"""
     __tablename__ = 'admins'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    
-    # Permissions
+
     is_super_admin = db.Column(db.Boolean, default=False)
-    permissions = db.Column(db.JSON, default={})  # Store permissions as JSON
-    
+    permissions = db.Column(db.JSON, default={})
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
-    
+
+    # 🔥 REQUIRED FOR FLASK-LOGIN
+    def get_id(self):
+        return f"admin-{self.id}"
+
     def set_password(self, password):
-        """Hash and set password"""
         self.password_hash = generate_password_hash(password)
-    
+
     def check_password(self, password):
-        """Verify password against hash"""
         return check_password_hash(self.password_hash, password)
-    
+
     def __repr__(self):
         return f'<Admin {self.username}>'
 
