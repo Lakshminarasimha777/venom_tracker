@@ -1,6 +1,4 @@
-"""
-Flask application factory
-"""
+"""Flask application factory"""
 
 import os
 from flask import Flask, render_template, redirect, url_for, session
