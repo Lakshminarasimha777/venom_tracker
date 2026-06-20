@@ -252,7 +252,14 @@ def emergency_sos():
 
         
 
-        nearby_with_venom = nearby
+        nearby_with_venom = []
+
+        for item in nearby:
+            hospital = item['hospital']
+
+            # send only active hospitals
+            if hospital.is_active:
+                nearby_with_venom.append(item)
 
 
 
