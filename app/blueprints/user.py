@@ -258,9 +258,8 @@ def emergency_sos():
             hospital = item['hospital']
 
             # send only active hospitals
-            if hospital.is_active:
+            if hospital.is_active and hospital.has_venom_available():
                 nearby_with_venom.append(item)
-
 
 
         hospitals_notified = 0
