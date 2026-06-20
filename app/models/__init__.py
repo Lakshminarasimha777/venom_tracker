@@ -124,14 +124,15 @@ class Hospital(db.Model):
          self.venom_types_available = json.dumps(venom_types)
 
     def has_venom_available(self):
-        """Check if hospital has actual venom stock"""
+        """Check real venom stock safely"""
 
         if not self.is_active:
             return False
 
-        # CHECK REAL STOCK (IMPORTANT)
-        for stock in self.venom_stocks:
-            if stock.quantity > 0:
+        stocks = list(self.venom_stocks)
+
+        for stock in stocks:
+            if stock.quantity and stock.quantity > 0:
                 return True
 
         return False
