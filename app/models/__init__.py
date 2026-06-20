@@ -124,17 +124,18 @@ class Hospital(db.Model):
         self.venom_types_available = json.dumps(venom_types)
     
     def has_venom_available(self):
-    # If hospital is inactive, block it
-    if not self.is_active:
-        return False
+    """Check if hospital actually has venom stock or configured availability"""
 
-    venom_list = self.get_available_venom_types()
+        if not self.is_active:
+            return False
 
-    # If venom types are not configured, still allow hospital
-    if len(venom_list) == 0:
-        return True
+        venom_list = self.get_available_venom_types()
 
-    return True
+        # If no venom types OR empty stock → NOT available
+        if not venom_list:
+            return False
+
+        return True 
 
 
 class VenomStock(db.Model):
