@@ -212,23 +212,142 @@ def find_hospitals():
 
 @user_bp.route('/emergency-sos', methods=['POST'])
 def emergency_sos():
-    """Send emergency SOS alert"""
+
     user = get_current_user()
     if not user:
-        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
-    
+        return jsonify({
+            'success': False,
+            'error': 'Login required'
+        }), 401
+
     try:
+
         data = request.get_json()
-        
-        latitude = float(data.get('latitude', 0))
-        longitude = float(data.get('longitude', 0))
+
+        latitude = float(data.get('latitude'))
+        longitude = float(data.get('longitude'))
+
         snake_type = data.get('snake_type', 'Unknown')
         severity = data.get('severity', 'moderate')
         description = data.get('description', '')
         location = data.get('location', '')
-        
-        if latitude == 0 or longitude == 0:
-            return jsonify({'success': False, 'error': 'Invalid location'}), 400
+
+        hospitals = Hospital.query.filter_by(
+            is_active=True
+        ).all()
+
+        nearby = get_nearby_hospitals(
+
+            {
+                'latitude': latitude,
+                'longitude': longitude
+            },
+
+            hospitals,
+
+            radius_km=50
+
+        )
+
+
+        nearby_with_venom = []
+
+        for item in nearby:
+
+            hospital = item['hospital']
+
+            if hospital.has_venom_available():
+
+                nearby_with_venom.append(item)
+
+
+
+        hospitals_notified = 0
+
+
+        for item in nearby_with_venom[:10]:
+
+            hospital = item['hospital']
+
+
+            emergency_case = EmergencyCase(
+
+                user_id=user.id,
+
+                hospital_id=hospital.id,
+
+                snake_type=snake_type,
+
+                location=location,
+
+                latitude=latitude,
+
+                longitude=longitude,
+
+                severity=severity,
+
+                description=description,
+
+                status='pending'
+
+            )
+
+            db.session.add(emergency_case)
+            db.session.flush()
+
+
+
+            notification = Notification(
+
+                hospital_id=hospital.id,
+
+                emergency_case_id=emergency_case.id,
+
+                type='emergency_alert',
+
+                title=f'SOS Alert - {snake_type}',
+
+                message=f'Snake bite reported at {location}'
+
+            )
+
+            db.session.add(notification)
+
+
+            if hospital.phone:
+                send_sms_alert(
+                    hospital.phone,
+                    f'Snake bite emergency at {location}'
+                )
+
+            hospitals_notified += 1
+
+
+        db.session.commit()
+
+
+        return jsonify({
+
+            'success': True,
+
+            'message': 'SOS sent successfully',
+
+            'hospitals_notified': hospitals_notified
+
+        })
+
+
+    except Exception as e:
+
+        db.session.rollback()
+
+        return jsonify({
+
+            'success': False,
+
+            'error': str(e)
+
+        }), 400
         
         # Create emergency case
         emergency_case = EmergencyCase(
