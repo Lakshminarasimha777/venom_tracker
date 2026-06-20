@@ -250,15 +250,9 @@ def emergency_sos():
         )
 
 
-        nearby_with_venom = []
+        
 
-        for item in nearby:
-
-            hospital = item['hospital']
-
-            if hospital.has_venom_available():
-
-                nearby_with_venom.append(item)
+        nearby_with_venom = nearby
 
 
 
