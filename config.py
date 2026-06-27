@@ -25,6 +25,7 @@ class Config:
 
     # Database
     database_url = os.getenv("DATABASE_URL")
+    print("DATABASE_URL =", database_url)
 
     if database_url and database_url.startswith("postgres://"):
         database_url = database_url.replace(
