@@ -17,63 +17,69 @@ def env_bool(var_name, default=False):
 
 class Config:
     """Base configuration"""
+
     # Flask settings
     FLASK_ENV = os.getenv('FLASK_ENV', 'development')
     DEBUG = env_bool('DEBUG', False)
     TESTING = False
-    
+
     # Database
     database_url = os.getenv("DATABASE_URL")
 
-if database_url and database_url.startswith("postgres://"):
-    database_url = database_url.replace(
-        "postgres://",
-        "postgresql://",
-        1
-    )
+    if database_url and database_url.startswith("postgres://"):
+        database_url = database_url.replace(
+            "postgres://",
+            "postgresql://",
+            1
+        )
 
-SQLALCHEMY_DATABASE_URI = (
-    database_url or "sqlite:///venom_tracker.db"
-)
-    
+    SQLALCHEMY_DATABASE_URI = database_url or "sqlite:///venom_tracker.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    
+
     # Session
     SESSION_COOKIE_SECURE = env_bool('SESSION_COOKIE_SECURE', True)
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
-    
+
     # Secret key for session management
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
-    
+    SECRET_KEY = os.getenv(
+        'SECRET_KEY',
+        'dev-secret-key-change-in-production'
+    )
+
     # JWT Configuration
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')
+    JWT_SECRET_KEY = os.getenv(
+        'JWT_SECRET_KEY',
+        'jwt-secret-key-change-in-production'
+    )
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
-    
+
     # Google Maps API key
     GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY', '')
-    
+
     # Email Configuration
     MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.getenv('MAIL_PORT', 587))
     MAIL_USE_TLS = env_bool('MAIL_USE_TLS', True)
     MAIL_USERNAME = os.getenv('MAIL_USERNAME', '')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', '')
-    
+
     # SMS Configuration (Twilio)
     TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID', '')
     TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN', '')
     TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER', '')
-    
+
     # Application settings
     ITEMS_PER_PAGE = 10
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
-    
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB max file size
+
     # Search settings
-    MAX_SEARCH_RADIUS_KM = 50  # Maximum search radius for hospitals
-    # Allow showing unverified hospitals in user-facing lists (useful for testing)
-    SHOW_UNVERIFIED_HOSPITALS = env_bool('SHOW_UNVERIFIED_HOSPITALS', False)
+    MAX_SEARCH_RADIUS_KM = 50
+    SHOW_UNVERIFIED_HOSPITALS = env_bool(
+        'SHOW_UNVERIFIED_HOSPITALS',
+        False
+    )
 
 
 class DevelopmentConfig(Config):
@@ -97,10 +103,13 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SECURE = True
 
 
-# Configuration dictionary
 config_by_name = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
     'production': ProductionConfig,
     'default': DevelopmentConfig
 }
+    
+    
+    
+    
