@@ -121,7 +121,7 @@ class Hospital(db.Model):
 
     def set_available_venom_types(self, venom_types):
         """Set venom types the hospital has"""
-         self.venom_types_available = json.dumps(venom_types)
+        self.venom_types_available = json.dumps(venom_types)
 
     def has_venom_available(self):
         """Check real venom stock safely"""
