@@ -43,16 +43,10 @@ class Config:
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 
     # Secret key for session management
-    SECRET_KEY = os.getenv(
-        'SECRET_KEY',
-        'dev-secret-key-change-in-production'
-    )
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 
     # JWT Configuration
-    JWT_SECRET_KEY = os.getenv(
-        'JWT_SECRET_KEY',
-        'jwt-secret-key-change-in-production'
-    )
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
     # Google Maps API key
@@ -72,14 +66,11 @@ class Config:
 
     # Application settings
     ITEMS_PER_PAGE = 10
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB max file size
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 
     # Search settings
     MAX_SEARCH_RADIUS_KM = 50
-    SHOW_UNVERIFIED_HOSPITALS = env_bool(
-        'SHOW_UNVERIFIED_HOSPITALS',
-        False
-    )
+    SHOW_UNVERIFIED_HOSPITALS = env_bool('SHOW_UNVERIFIED_HOSPITALS', False)
 
 
 class DevelopmentConfig(Config):
@@ -109,7 +100,3 @@ config_by_name = {
     'production': ProductionConfig,
     'default': DevelopmentConfig
 }
-    
-    
-    
-    
