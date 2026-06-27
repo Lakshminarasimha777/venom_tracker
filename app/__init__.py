@@ -37,34 +37,34 @@ def create_app(config_name='development'):
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login_user_page'
     
-@login_manager.user_loader
-def load_user(user_id):
-    """Load User or Admin"""
+    @login_manager.user_loader
+    def load_user(user_id):
+        """Load User or Admin"""
 
-    # ---------------- USER ----------------
-    try:
-        if user_id.isdigit():
-            return User.query.get(int(user_id))
-    except:
-        pass
+        # ---------------- USER ----------------
+        try:
+            if user_id.isdigit():
+                return User.query.get(int(user_id))
+        except:
+            pass
 
-    # ---------------- ADMIN ----------------
-    try:
-        if user_id.startswith("admin-"):
-            admin_id = int(user_id.replace("admin-", ""))
-            return Admin.query.get(admin_id)
-    except:
-        pass
+        # ---------------- ADMIN ----------------
+        try:
+            if user_id.startswith("admin-"):
+                admin_id = int(user_id.replace("admin-", ""))
+                return Admin.query.get(admin_id)
+        except:
+            pass
 
-    # ---------------- HOSPITAL (optional future support) ----------------
-    try:
-        if user_id.startswith("hospital-"):
-            hospital_id = int(user_id.replace("hospital-", ""))
-            return Hospital.query.get(hospital_id)
-    except:
-        pass
+        # ---------------- HOSPITAL (optional future support) ----------------
+        try:
+            if user_id.startswith("hospital-"):
+                hospital_id = int(user_id.replace("hospital-", ""))
+                return Hospital.query.get(hospital_id)
+        except:
+            pass
 
-    return None
+        return None
     
     # Register blueprints
     app.register_blueprint(auth_bp)
