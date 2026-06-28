@@ -159,6 +159,8 @@ def register_hospital():
             return redirect(url_for('auth.register_hospital'))
 
         try:
+            print("===== NEW HOSPITAL REGISTRATION CODE IS RUNNING =====")
+            
             hospital = Hospital(
                 name=name,
                 email=email,
