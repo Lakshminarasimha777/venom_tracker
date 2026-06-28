@@ -62,12 +62,12 @@ class Hospital(db.Model):
     phone = db.Column(db.String(15), nullable=False)
     
     # Location
-    latitude = db.Column(db.Float, nullable=False)
-    longitude = db.Column(db.Float, nullable=False)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
     address = db.Column(db.Text, nullable=False)
     district = db.Column(db.String(100), nullable=False, index=True)
-    state = db.Column(db.String(100), nullable=False)
-    pincode = db.Column(db.String(10), nullable=False)
+    state = db.Column(db.String(100), nullable=True)
+    pincode = db.Column(db.String(10), nullable=True)
     
     # Hospital details
     registration_number = db.Column(db.String(100), nullable=True)
