@@ -18,7 +18,7 @@
                         <a href="{{ url_for('auth.register_user') }}" class="btn btn-light btn-lg px-4 gap-3">
                             <i class="fas fa-user-plus"></i> Register as User
                         </a>
-                        <a href="{{ url_for('auth.login_user_page') }}" class="btn btn-outline-light btn-lg px-4">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">
                             <i class="fas fa-sign-in-alt"></i> Login
                         </a>
                     {% elif session.get('user_type') == 'user' %}
