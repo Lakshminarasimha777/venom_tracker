@@ -23,7 +23,7 @@ def dashboard():
     admin = get_current_admin()
     if not admin:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     # Get statistics
     total_users = User.query.count()
@@ -68,7 +68,7 @@ def users():
     admin = get_current_admin()
     if not admin:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     search = request.args.get('search', '')
     page = request.args.get('page', 1, type=int)
@@ -100,7 +100,7 @@ def view_user(user_id):
     admin = get_current_admin()
     if not admin:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     user = User.query.get_or_404(user_id)
     
@@ -169,7 +169,7 @@ def hospitals():
     admin = get_current_admin()
     if not admin:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     status = request.args.get('status', 'all')  # all, verified, unverified, inactive
     search = request.args.get('search', '')
@@ -209,7 +209,7 @@ def view_hospital(hospital_id):
     admin = get_current_admin()
     if not admin:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     hospital = Hospital.query.get_or_404(hospital_id)
     
@@ -341,7 +341,7 @@ def add_hospital():
     admin = get_current_admin()
     if not admin:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     if request.method == 'POST':
         try:
@@ -409,7 +409,7 @@ def edit_hospital(hospital_id):
     admin = get_current_admin()
     if not admin:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     hospital = Hospital.query.get_or_404(hospital_id)
     
@@ -488,7 +488,7 @@ def emergency_cases():
     admin = get_current_admin()
     if not admin:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     status = request.args.get('status', 'all')
     page = request.args.get('page', 1, type=int)
@@ -516,7 +516,7 @@ def analytics():
     admin = get_current_admin()
     if not admin:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     # Get statistics for different time periods
     today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -574,7 +574,7 @@ def settings():
     admin = get_current_admin()
     if not admin:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     return render_template('admin/settings.html', admin=admin)
 

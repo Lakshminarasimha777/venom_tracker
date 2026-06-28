@@ -25,7 +25,7 @@ def dashboard():
     user = get_current_user()
     if not user:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     # Get user's recent cases
     recent_cases = EmergencyCase.query.filter_by(user_id=user.id).order_by(
@@ -136,7 +136,7 @@ def find_hospitals():
     user = get_current_user()
     if not user:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     nearby_hospitals = []
     user_location = None
@@ -422,7 +422,7 @@ def cases():
     user = get_current_user()
     if not user:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     # Get all user's cases with pagination
     page = request.args.get('page', 1, type=int)
@@ -439,7 +439,7 @@ def view_case(case_id):
     user = get_current_user()
     if not user:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     case = EmergencyCase.query.get_or_404(case_id)
     
@@ -457,7 +457,7 @@ def notifications():
     user = get_current_user()
     if not user:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     page = request.args.get('page', 1, type=int)
     notifications = Notification.query.filter_by(user_id=user.id).order_by(
@@ -499,7 +499,7 @@ def settings():
     user = get_current_user()
     if not user:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     return render_template('user/settings.html', user=user)
 

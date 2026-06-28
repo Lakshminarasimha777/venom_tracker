@@ -25,7 +25,7 @@ def dashboard():
     hospital = get_current_hospital()
     if not hospital:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     # Get statistics
     today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -82,7 +82,7 @@ def stock():
     hospital = get_current_hospital()
     if not hospital:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     stocks = VenomStock.query.filter_by(hospital_id=hospital.id).all()
     
@@ -211,7 +211,7 @@ def emergency_cases():
     hospital = get_current_hospital()
     if not hospital:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     status = request.args.get('status', 'all')
     page = request.args.get('page', 1, type=int)
@@ -239,7 +239,7 @@ def view_case(case_id):
     hospital = get_current_hospital()
     if not hospital:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     case = EmergencyCase.query.get_or_404(case_id)
     
@@ -377,7 +377,7 @@ def analytics():
     hospital = get_current_hospital()
     if not hospital:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     # Get 30-day statistics
     thirty_days_ago = datetime.utcnow() - timedelta(days=30)
@@ -416,7 +416,7 @@ def notifications():
     hospital = get_current_hospital()
     if not hospital:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     page = request.args.get('page', 1, type=int)
     notifications = Notification.query.filter_by(hospital_id=hospital.id).order_by(
@@ -455,7 +455,7 @@ def settings():
     hospital = get_current_hospital()
     if not hospital:
         flash('Please login first', 'danger')
-        return redirect(url_for('auth.login_user_page'))
+        return redirect(url_for('auth.login'))
     
     return render_template('hospital/settings.html', hospital=hospital)
 

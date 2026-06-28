@@ -35,7 +35,7 @@ def create_app(config_name='development'):
     # Initialize login manager
     login_manager = LoginManager()
     login_manager.init_app(app)
-    login_manager.login_view = 'auth.login_user_page'
+    login_manager.login_view = 'auth.login'
     
     @login_manager.user_loader
     def load_user(user_id):
