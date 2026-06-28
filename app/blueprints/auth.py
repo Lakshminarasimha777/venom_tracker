@@ -163,6 +163,8 @@ def register_hospital():
                 name=name,
                 email=email,
                 phone=phone,
+                latitude=0.0,
+                longitude=0.0,
                 address=address,
                 district=district,
                 state=state,
