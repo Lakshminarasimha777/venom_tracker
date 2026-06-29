@@ -41,7 +41,7 @@ def dashboard():
     nearby_hospitals = []
     nearby_count = 0
 
-    def add_hospital_entry(hospital, distance=None):
+    def add_hospital_entry(hospital, distance=None, target_list=None):
         stocks = VenomStock.query.filter_by(hospital_id=hospital.id).all()
         stock_info = []
         total_stock = 0
@@ -54,7 +54,10 @@ def dashboard():
                 'status': stock.get_status()
             })
 
-        nearby_hospitals.append({
+        if target_list is None:
+            target_list = nearby_hospitals
+
+        target_list.append({
             'id': hospital.id,
             'name': hospital.name,
             'phone': hospital.phone,
@@ -119,6 +122,23 @@ def dashboard():
         hospital['is_logged_in'] = hospital_obj.last_login and hospital_obj.last_login > cutoff_time
         hospital['last_login'] = hospital_obj.last_login
 
+    # Build a list of all registered hospitals to show in the dashboard
+    all_registered_hospitals = []
+    # Include all active hospitals (show unverified hospitals as well)
+    query = Hospital.query.filter_by(is_active=True)
+
+    for hospital in query.all():
+        # compute distance when possible
+        distance = None
+        if user.latitude is not None and user.longitude is not None and hospital.latitude is not None and hospital.longitude is not None:
+            try:
+                distance = round(calculate_distance(user.latitude, user.longitude, hospital.latitude, hospital.longitude), 2)
+            except Exception:
+                distance = None
+
+        # Use helper to append to a separate list
+        add_hospital_entry(hospital, distance=distance, target_list=all_registered_hospitals)
+
     return render_template(
         'user/dashboard.html',
         user=user,
@@ -127,6 +147,7 @@ def dashboard():
         venom_types=get_snake_venom_types(),
         nearby_hospitals=nearby_hospitals,
         nearby_count=nearby_count
+        ,all_registered_hospitals=all_registered_hospitals
     )
 
 
@@ -216,7 +237,6 @@ def emergency_sos():
     user = get_current_user()
     if not user:
         return jsonify({'success': False, 'error': 'Login required'}), 401
-
     try:
         data = request.get_json()
 
@@ -228,7 +248,7 @@ def emergency_sos():
         description = data.get('description', '')
         location = data.get('location', '')
 
-        # 1. Create emergency case FIRST
+        # 1. Create emergency case
         emergency_case = EmergencyCase(
             user_id=user.id,
             snake_type=snake_type,
@@ -246,43 +266,37 @@ def emergency_sos():
         # 2. Get hospitals
         hospitals = Hospital.query.filter_by(is_active=True, is_verified=True).all()
 
-        nearby = get_nearby_hospitals(
-            {'latitude': latitude, 'longitude': longitude},
-            hospitals,
-            radius_km=50
-        )
+        # 3. Try to get nearby hospitals within radius
+        nearby = get_nearby_hospitals({'latitude': latitude, 'longitude': longitude}, hospitals, radius_km=50)
+        nearby_with_venom = [item for item in nearby if item['hospital'].has_venom_available()]
 
-        # 3. FILTER hospitals properly
-        nearby_with_venom = []
-
-        for item in nearby:
-            hospital = item['hospital']
-
-            if hospital.is_active and hospital.is_verified and hospital.has_venom_available():
-                nearby_with_venom.append(item)
-
-        # 4. If no hospitals found → fallback (important)
+        # 4. Fallback: if none found, compute distances for hospitals that declared venom types
         if not nearby_with_venom:
+            candidates = []
             for hospital in hospitals:
-                if hospital.has_venom_available():
-                    distance = calculate_distance(
-                        latitude, longitude,
-                        hospital.latitude, hospital.longitude
-                    )
+                if not hospital.has_venom_available():
+                    continue
+                if hospital.latitude is None or hospital.longitude is None:
+                    # No coordinates: include later with unknown distance
+                    candidates.append({'hospital': hospital, 'distance': None})
+                    continue
+                try:
+                    dist = calculate_distance(latitude, longitude, hospital.latitude, hospital.longitude)
+                except Exception:
+                    continue
+                candidates.append({'hospital': hospital, 'distance': round(dist, 2)})
 
-                    nearby_with_venom.append({
-                        'hospital': hospital,
-                        'distance': round(distance, 2)
-                    })
+            # Prefer ones with distance, sort and take top 10; if none have coords, take first 10 declared hospitals
+            with_distance = [c for c in candidates if c['distance'] is not None]
+            without_distance = [c for c in candidates if c['distance'] is None]
 
-            nearby_with_venom = sorted(
-                nearby_with_venom,
-                key=lambda x: x['distance']
-            )[:10]
+            if with_distance:
+                nearby_with_venom = sorted(with_distance, key=lambda x: x['distance'])[:10]
+            else:
+                nearby_with_venom = without_distance[:10]
 
-        # 5. Notify hospitals
+        # 5. Notify up to 10 hospitals
         hospitals_notified = 0
-
         for item in nearby_with_venom[:10]:
             hospital = item['hospital']
 
@@ -300,6 +314,9 @@ def emergency_sos():
 
             if hospital.phone:
                 send_sms_alert(hospital.phone, alert_message)
+                # also attempt a call for higher urgency
+                if severity == 'severe':
+                    send_call_alert(hospital.phone, alert_message)
 
             if hospital.email:
                 send_email_alert(hospital.email, f'SOS Alert - {snake_type}', alert_message)
@@ -315,77 +332,6 @@ def emergency_sos():
             'hospitals_notified': hospitals_notified
         })
 
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)}), 400
-        
-        # Create emergency case
-        emergency_case = EmergencyCase(
-            user_id=user.id,
-            snake_type=snake_type,
-            location=location,
-            latitude=latitude,
-            longitude=longitude,
-            severity=severity,
-            description=description,
-            status='pending'
-        )
-        
-        db.session.add(emergency_case)
-        db.session.commit()
-        
-        # Find nearest hospitals (search wider radius for emergency)
-        hospitals = Hospital.query.filter_by(is_active=True, is_verified=True).all()
-        user_location = {'latitude': latitude, 'longitude': longitude}
-        
-        # Get hospitals within 50km radius for emergency
-        nearby = get_nearby_hospitals(user_location, hospitals, radius_km=50)
-        
-        # Filter to only hospitals with venom availability and take top 10
-        nearby_with_venom = [item for item in nearby if item['hospital'].has_venom_available()][:10]
-        
-        # If no hospitals with venom in radius, get all verified hospitals with venom (no distance limit for emergency)
-        if not nearby_with_venom:
-            all_hospitals = Hospital.query.filter_by(is_active=True, is_verified=True).all()
-            for hospital in all_hospitals:
-                if hospital.has_venom_available():
-                    distance = calculate_distance(latitude, longitude, hospital.latitude, hospital.longitude)
-                    nearby_with_venom.append({
-                        'hospital': hospital,
-                        'distance': round(distance, 2)
-                    })
-            nearby_with_venom = sorted(nearby_with_venom, key=lambda x: x['distance'])[:10]
-        
-        # Send notifications to nearby hospitals
-        for item in nearby_with_venom:
-            hospital = item['hospital']
-            alert_message = f'New emergency case at {location}. Distance: {item["distance"]} km. Severity: {severity}.'
-
-            notification = Notification(
-                hospital_id=hospital.id,
-                emergency_case_id=emergency_case.id,
-                type='emergency_alert',
-                title=f'Emergency SOS Alert - {snake_type}',
-                message=alert_message
-            )
-            db.session.add(notification)
-
-            # Send simulated SMS and call alerts to the hospital
-            if hospital.phone:
-                send_sms_alert(hospital.phone, alert_message)
-                send_call_alert(hospital.phone, alert_message)
-            if hospital.email:
-                send_email_alert(hospital.email, f'Emergency Alert - {snake_type}', alert_message)
-        
-        db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'message': 'Emergency alert sent to nearby hospitals',
-            'case_id': emergency_case.id,
-            'hospitals_notified': len(nearby_with_venom)
-        })
-    
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 400

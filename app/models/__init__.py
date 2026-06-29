@@ -135,6 +135,18 @@ class Hospital(db.Model):
             if stock.quantity and stock.quantity > 0:
                 return True
 
+        # If explicit venom types were registered during hospital signup,
+        # consider the hospital as having venom availability (even if
+        # VenomStock rows are not yet created). This helps show hospitals
+        # that registered their available venom types in the dashboard.
+        if self.venom_types_available:
+            try:
+                vt = json.loads(self.venom_types_available)
+                if vt:
+                    return True
+            except Exception:
+                pass
+
         return False
     
 

@@ -218,7 +218,7 @@
                             <h5 class="mb-0"><i class="fas fa-hospital"></i> All Registered Hospitals</h5>
                         </div>
                         <div class="card-body">
-                            {% if nearby_hospitals %}
+                            {% if all_registered_hospitals %}
                                 <div class="table-responsive">
                                     <table class="table table-striped mb-0">
                                         <thead>
@@ -231,7 +231,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {% for hospital in nearby_hospitals[:10] %}
+                                            {% for hospital in all_registered_hospitals[:10] %}
                                                 <tr>
                                                     <td>{{ hospital.name }}</td>
                                                     <td>

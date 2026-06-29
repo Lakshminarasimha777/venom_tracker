@@ -102,13 +102,18 @@ def get_nearby_hospitals(user_location, hospitals, radius_km=50):
     nearby = []
     
     for hospital in hospitals:
-        if hospital.latitude and hospital.longitude:
-            distance = calculate_distance(
-                user_location['latitude'],
-                user_location['longitude'],
-                hospital.latitude,
-                hospital.longitude
-            )
+        # Accept zero/negative coordinates but ensure they're not None
+        if hospital.latitude is not None and hospital.longitude is not None:
+            try:
+                distance = calculate_distance(
+                    float(user_location['latitude']),
+                    float(user_location['longitude']),
+                    float(hospital.latitude),
+                    float(hospital.longitude)
+                )
+            except Exception:
+                # Skip hospitals with invalid coordinate values
+                continue
             
             if distance <= radius_km:
                 nearby.append({
