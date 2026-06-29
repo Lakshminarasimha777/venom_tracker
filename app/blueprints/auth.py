@@ -160,13 +160,17 @@ def register_hospital():
 
         try:
             print("===== NEW HOSPITAL REGISTRATION CODE IS RUNNING =====")
+            latitude = request.form.get('latitude')
+            longitude = request.form.get('longitude')
+
+
             
             hospital = Hospital(
                 name=name,
                 email=email,
                 phone=phone,
-                latitude=0.0,
-                longitude=0.0,
+                latitude=float(latitude) if latitude else None,
+                longitude=float(longitude) if longitude else None,
                 address=address,
                 district=district,
                 state=state,
