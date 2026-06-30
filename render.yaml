@@ -18,6 +18,8 @@ services:
         value: mln123
       - key: ADMIN_EMAIL
         value: mln@gmail.com
+      - key: INITIALIZE_SAMPLE_DATA
+        value: 'True'
     healthCheckPath: /
     autoDeploy: true
     instanceType: starter

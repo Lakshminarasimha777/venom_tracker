@@ -82,7 +82,7 @@ def create_app(config_name='development'):
                          (os.getenv('INITIALIZE_SAMPLE_DATA', '').lower() in ('1', 'true', 'yes'))
 
             # Create a default admin if none exist
-            if should_init and not Admin.query.first():
+            if not Admin.query.first():
                 default_admin_username = os.getenv('ADMIN_USERNAME') or os.getenv('DEFAULT_ADMIN_USERNAME', 'admin')
                 default_admin_email = os.getenv('ADMIN_EMAIL') or os.getenv('DEFAULT_ADMIN_EMAIL', 'admin@example.com')
                 default_admin_password = os.getenv('ADMIN_PASSWORD') or os.getenv('DEFAULT_ADMIN_PASSWORD', 'admin123')
@@ -93,7 +93,7 @@ def create_app(config_name='development'):
                 db.session.commit()
                 app.logger.info('Default admin account created')
 
-            # Create a demo user if none exist
+            # Create a demo user if none exist and initialization is enabled
             if should_init and not User.query.first():
                 demo_user = User(username='farmer1', email='farmer1@example.com', phone='9876543210')
                 demo_user.set_password('password123')
@@ -101,7 +101,7 @@ def create_app(config_name='development'):
                 db.session.commit()
                 app.logger.info('Demo user account created')
 
-            # Create a demo hospital if none exist
+            # Create a demo hospital if none exist and initialization is enabled
             if should_init and not Hospital.query.first():
                 demo_hospital = Hospital(
                     name='City Hospital',
