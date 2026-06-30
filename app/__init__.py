@@ -83,9 +83,9 @@ def create_app(config_name='development'):
 
             # Create a default admin if none exist
             if should_init and not Admin.query.first():
-                default_admin_username = os.getenv('DEFAULT_ADMIN_USERNAME', 'admin')
-                default_admin_email = os.getenv('DEFAULT_ADMIN_EMAIL', 'admin@example.com')
-                default_admin_password = os.getenv('DEFAULT_ADMIN_PASSWORD', 'admin123')
+                default_admin_username = os.getenv('ADMIN_USERNAME') or os.getenv('DEFAULT_ADMIN_USERNAME', 'admin')
+                default_admin_email = os.getenv('ADMIN_EMAIL') or os.getenv('DEFAULT_ADMIN_EMAIL', 'admin@example.com')
+                default_admin_password = os.getenv('ADMIN_PASSWORD') or os.getenv('DEFAULT_ADMIN_PASSWORD', 'admin123')
                 admin = Admin(username=default_admin_username, email=default_admin_email)
                 admin.set_password(default_admin_password)
                 admin.is_super_admin = True
