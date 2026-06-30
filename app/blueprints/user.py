@@ -268,36 +268,36 @@ def emergency_sos():
 
         # 3. Try to get nearby hospitals within radius
         nearby = get_nearby_hospitals({'latitude': latitude, 'longitude': longitude}, hospitals, radius_km=50)
-        nearby_with_venom = [item for item in nearby if item['hospital'].has_venom_available()]
+        hospitals_to_notify = [item for item in nearby if item['hospital'].has_venom_available()]
 
-        # 4. Fallback: if none found, compute distances for hospitals that declared venom types
-        if not nearby_with_venom:
-            candidates = []
-            for hospital in hospitals:
-                if not hospital.has_venom_available():
-                    continue
-                if hospital.latitude is None or hospital.longitude is None:
-                    # No coordinates: include later with unknown distance
-                    candidates.append({'hospital': hospital, 'distance': None})
-                    continue
-                try:
-                    dist = calculate_distance(latitude, longitude, hospital.latitude, hospital.longitude)
-                except Exception:
-                    continue
-                candidates.append({'hospital': hospital, 'distance': round(dist, 2)})
-
-            # Prefer ones with distance, sort and take top 10; if none have coords, take first 10 declared hospitals
-            with_distance = [c for c in candidates if c['distance'] is not None]
-            without_distance = [c for c in candidates if c['distance'] is None]
-
-            if with_distance:
-                nearby_with_venom = sorted(with_distance, key=lambda x: x['distance'])[:10]
+        # 4. Fallback: if no nearby hospital has venom availability, notify nearby hospitals anyway
+        if not hospitals_to_notify:
+            if nearby:
+                hospitals_to_notify = nearby[:10]
             else:
-                nearby_with_venom = without_distance[:10]
+                candidates = []
+                for hospital in hospitals:
+                    if hospital.latitude is None or hospital.longitude is None:
+                        candidates.append({'hospital': hospital, 'distance': None})
+                        continue
+                    try:
+                        dist = calculate_distance(latitude, longitude, hospital.latitude, hospital.longitude)
+                    except Exception:
+                        continue
+                    candidates.append({'hospital': hospital, 'distance': round(dist, 2)})
+
+                # Prefer hospitals with valid distance, sorted by proximity
+                with_distance = [c for c in candidates if c['distance'] is not None]
+                without_distance = [c for c in candidates if c['distance'] is None]
+
+                if with_distance:
+                    hospitals_to_notify = sorted(with_distance, key=lambda x: x['distance'])[:10]
+                else:
+                    hospitals_to_notify = without_distance[:10]
 
         # 5. Notify up to 10 hospitals
         hospitals_notified = 0
-        for item in nearby_with_venom[:10]:
+        for item in hospitals_to_notify[:10]:
             hospital = item['hospital']
 
             alert_message = f"Snake bite emergency at {location}. Severity: {severity}"
